@@ -12,15 +12,22 @@
 import time
 import scrapy
 from selenium import webdriver
+import re
 from scrapy.selector import Selector
+
 from CrawlerAffair.items import CrawlerAffairItem
 
-class ChinaSpider(scrapy.Spider):
-    name = "china_spide"
+class ChinaNewsSpider(scrapy.Spider):
+    name = "china_news_spider"
     allowed_domains = ["china.com.cn"]
-    def __init__(self, *args, **kwargs):
-        super(ChinaSpider, self).__init__(*args, **kwargs)
-        self.start_urls = ['http://news.china.com.cn/']
+    # def __init__(self, *args, **kwargs):
+    #     super(ChinaSpider, self).__init__(*args, **kwargs)
+        # self.start_urls = ['http://news.china.com.cn/']
+
+    def start_requests(self):
+        urls = ['http://news.china.com.cn/']
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
 
     # parse web html
     def parse(self, response):
@@ -45,34 +52,178 @@ class ChinaSpider(scrapy.Spider):
     def parse_sub_page(self, response):
 
         sel = Selector(response)
+
         news_list = sel.xpath('//ul[@class="newsList"]/li/a/@href').extract()
         for news_url in news_list:
-            news_item = CrawlerAffairItem()
+            # news_item = CrawlerAffairItem()
             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
-            label = sel.xpath("/html/body/div[2]/div[1]/h1/span/text()").extract()[0]
-            news_item['label'] = label.strip()
-            yield scrapy.Request(url=news_url, meta={"news_item": news_item}, callback=self.parse_detail)
+            # label = sel.xpath("/html/body/div[2]/div[1]/h1/span/text()").extract()[0]
+            # news_item['label'] = label.strip()
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
 
     def parse_detail(self, response):
 
         sel = Selector(response)
 
-        news_item = response.meta['news_item']
+        news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
         publish_time = sel.xpath('//*[@id="pubtime_baidu"]/text()').extract()[0]
 
-        title = sel.xpath('//h1[@class="articleTitle"]/text()').extract()[0]
+        title = sel.xpath('//h1[@class="articleTitle"]/text()').extract()
         contents = sel.xpath('//*[@id="articleBody"]/p/text()').extract()
+        labels = sel.xpath('//*[@id="articleKeywords"]/a/text()').extract()
 
         news_item["spider_time"] = spider_time
-        news_item["publish_time"] = publish_time.strip()
-        news_item["title"] = title.strip()
-        news_item["content"] = "\n".join([content.strip() for content in contents])
+        news_item["publish_time"] = process_time(publish_time.strip())
+        news_item["title"] = process_title(title)
+        news_item['label'] = process_label(labels)
+        news_item["content"] = process_content(contents)
         news_item['url'] = sel.response.url.strip()
 
         return news_item
 
+
+class ChinaAffairSpider(scrapy.Spider):
+    name = "china_affair_spider"
+    allowed_domains = ["china.com.cn"]
+
+    def start_requests(self):
+        urls = ['http://zw.china.com.cn/']
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    # parse web html
+    def parse(self, response):
+        sel = Selector(response)
+        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        iframe_url = sel.xpath('/html/body/div[1]/iframe').extract_first()
+
+        regex = re.compile("http://[^\s]*.htm")
+        url = regex.findall(iframe_url)[0]
+
+        yield scrapy.Request(url=url, meta=None, callback=self.parse_iframe)
+
+
+    def parse_iframe(self, response):
+
+        sel = Selector(response)
+        custom_menu = ["政务要闻", "政务信息", "地方政务", "政务信息"]
+        menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        for menu_url in menu_list:
+            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+                continue
+            else:
+                url = menu_url.xpath('./@href').extract_first()
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_menu_page)
+
+    def parse_menu_page(self, response):
+
+        sel = Selector(response)
+        page_list = [sel.response.url]
+        page_list.extend(sel.xpath('//*[@id="autopage"]/center/a/@href').extract())
+        for page_url in page_list:
+            yield scrapy.Request(url=page_url, meta=None, callback=self.parse_sub_page)
+
+    def parse_sub_page(self, response):
+
+        sel = Selector(response)
+
+        news_list = sel.xpath('//ul/li/a/@href').extract()
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+
+    def parse_detail(self, response):
+
+        sel = Selector(response)
+
+        news_item = CrawlerAffairItem()
+        spider_time = str(int(time.time()))
+
+        publish_time = sel.xpath('//div[@class="big_img"]/div[@class="more"]/text()').extract_first()
+
+        title = sel.xpath('//div[@class="big_img"]/h1/text()').extract()
+        contents = sel.xpath('//*[@id="content"]/p/text()').extract()
+        labels = []
+
+        news_item["spider_time"] = spider_time
+        news_item["publish_time"] = process_time(publish_time)
+        news_item["title"] = process_title(title)
+        news_item["label"] = process_label(labels)
+        news_item["content"] = process_content(contents)
+        news_item['url'] = sel.response.url.strip()
+
+        return news_item
+
+
+
+class ChinaViewSpider(scrapy.Spider):
+
+    pass
+
+class ChinaTheorySpider(scrapy.Spider):
+    pass
+
+
+
+def process_title(title):
+    """
+
+    :param title:
+    :return:
+    """
+    if len(title)>=1:
+        title = title[0].strip()
+    else:
+        title = ''
+    return title
+
+def process_label(labels):
+    """
+
+    :param labels:
+    :return:
+    """
+    if len(labels) >=1:
+        label = ",".join([label.strip() for label in labels])
+    else:
+        label = ''
+    return label
+
+def process_content(contents):
+    """
+
+    :param contents:
+    :return:
+    """
+    content = "\n".join([content.strip() for content in contents])
+    return content
+
+
+def process_time(local_time):
+
+    local_time.replace('：', ':')
+    time_date = re.findall(r'\d{4}-\d{1,2}-\d{1,2}', local_time)
+    time_second = re.findall(r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}', local_time)
+    if len(time_date) == 0:
+        local_time = "1970-01-01 08:00:00"
+
+    else:
+        if len(time_second) > 0:
+            local_time = time_second[0]
+        else:
+            local_time = time_date[0] + " 00:00:00"
+
+    struct_time = time.strptime(local_time, "%Y-%m-%d %H:%M:%S")
+    stamp = str(int(time.mktime(struct_time)))
+
+    return stamp
+
+
+if __name__ == "__main__":
+    local_time = "1970-01-01 08:00:00"
+    print(process_time(local_time))
 
 
 
