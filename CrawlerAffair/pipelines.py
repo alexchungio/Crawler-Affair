@@ -58,7 +58,6 @@ class ItemToCSVPipeline(object):
 
     def close_spider(self, spider):
         self.fhd.close()
-        self.write.close()
 
     def process_item(self, item, spider):
 
