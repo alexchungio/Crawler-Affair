@@ -342,12 +342,14 @@ def process_content(contents):
 
 def process_time(local_time):
 
+    if local_time is None:
+        local_time = "1970-01-01 08:00:00"
     local_time.replace('：', ':')
     time_date = re.findall(r'\d{4}-\d{1,2}-\d{1,2}', local_time)
     time_second = re.findall(r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}', local_time)
+
     if len(time_date) == 0:
         local_time = "1970-01-01 08:00:00"
-
     else:
         if len(time_second) > 0:
             local_time = time_second[0]
