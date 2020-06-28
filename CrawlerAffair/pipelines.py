@@ -22,7 +22,7 @@ class CrawleraffairPipeline:
 class ItemToTextPipeline():
 
     def __init__(self, file_path):
-        self.path = os.path.join(file_path, str(int(time.time())) + '.txt')
+        self.path = file_path
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -30,7 +30,11 @@ class ItemToTextPipeline():
         return cls(file_path=file_path)
 
     def open_spider(self, spider):
-        self.fhd = open(self.path, 'w')
+        spider_dir = os.path.join(self.path, spider.name)
+        if os.path.exists(spider_dir) is False:
+            os.makedirs(spider_dir)
+        tmp_path = os.path.join(spider_dir, str(int(time.time())) + '.txt')
+        self.fhd = open(tmp_path, 'w')
 
     def close_spider(self, spider):
         self.fhd.close()
@@ -44,7 +48,7 @@ class ItemToTextPipeline():
 
 class ItemToCSVPipeline(object):
     def __init__(self, file_path):
-        self.path = os.path.join(file_path, str(int(time.time())) + '.csv')
+        self.path = file_path
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -52,7 +56,11 @@ class ItemToCSVPipeline(object):
         return cls(file_path=file_path)
 
     def open_spider(self, spider):
-        self.fhd = open(self.path, 'w')
+        spider_dir = os.path.join(self.path, spider.name)
+        if os.path.exists(spider_dir) is False:
+            os.makedirs(spider_dir)
+        tmp_path = os.path.join(spider_dir, str(int(time.time())) + '.csv')
+        self.fhd = open(tmp_path, 'w')
         self.write = csv.writer(self.fhd)
         self.write.writerow(['spider_time', 'publish_time','title', 'label', 'content', 'url'])
 
