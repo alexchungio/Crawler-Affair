@@ -15,7 +15,9 @@ from selenium import webdriver
 import re
 from scrapy.selector import Selector
 
+from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
+
 
 class ChinaNewsSpider(scrapy.Spider):
     name = "china_news_spider"
@@ -297,69 +299,6 @@ class ChinaTheorySpider(scrapy.Spider):
         news_item['url'] = sel.response.url.strip()
 
         return news_item
-
-
-
-def process_title(title):
-    """
-
-    :param title:
-    :return:
-    """
-    if len(title)>=1:
-        title = title[0].strip()
-        # remove \n\t and space
-        # title = ''.join([t.group() for t in title])
-        title = title.replace('\n', '')
-        title = title.replace('\t', '')
-        title = title.replace(' ', '')
-
-    else:
-        title = ''
-    return title
-
-def process_label(labels):
-    """
-
-    :param labels:
-    :return:
-    """
-    if len(labels) >=1:
-        label = ",".join([label.strip() for label in labels])
-    else:
-        label = ''
-    return label
-
-def process_content(contents):
-    """
-
-    :param contents:
-    :return:
-    """
-    content = "\n".join([content.strip() for content in contents])
-    return content
-
-
-def process_time(local_time):
-
-    if local_time is None:
-        local_time = "1970-01-01 08:00:00"
-    local_time.replace('：', ':')
-    time_date = re.findall(r'\d{4}-\d{1,2}-\d{1,2}', local_time)
-    time_second = re.findall(r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}', local_time)
-
-    if len(time_date) == 0:
-        local_time = "1970-01-01 08:00:00"
-    else:
-        if len(time_second) > 0:
-            local_time = time_second[0]
-        else:
-            local_time = time_date[0] + " 00:00:00"
-
-    struct_time = time.strptime(local_time, "%Y-%m-%d %H:%M:%S")
-    stamp = str(int(time.mktime(struct_time)))
-
-    return stamp
 
 
 if __name__ == "__main__":
