@@ -158,14 +158,74 @@ class ChinaAffairSpider(scrapy.Spider):
 
 
 
-class ChinaViewSpider(scrapy.Spider):
+class ChinaOpinionSpider(scrapy.Spider):
+    name = "china_opinion_spider"
+    allowed_domains = ["china.com.cn"]
 
-    pass
+    def start_requests(self):
+        urls = ['http://opinion.china.com.cn/']
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
 
-class ChinaTheorySpider(scrapy.Spider):
-    pass
+    # parse web html
+    def parse(self, response):
+        sel = Selector(response)
+        custom_menu = ["观点", "专栏", "图说"]
 
+        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        menu_list = sel.xpath('//div[@class="opinion-nav"]/div/ul/li/a')
 
+        for menu_url in menu_list:
+            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+                continue
+            else:
+                url = menu_url.xpath('./@href').extract_first()
+                url = sel.response.urljoin(url)
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_menu_page)
+
+    def parse_menu_page(self, response):
+
+        sel = Selector(response)
+
+        num_page = int(sel.xpath('//div[@class="list-page clearfix"]/span/text()').extract_first().split('/')[-1])
+        for i in range(1, num_page+1):
+            page_url = re.sub('\d', str(i), sel.response.url)
+            yield scrapy.Request(url=page_url, meta=None, callback=self.parse_sub_page)
+
+    def parse_sub_page(self, response):
+
+        sel = Selector(response)
+
+        news_list = sel.xpath('//ul[@class="opinion-list-2 pt50"]/li/dl/dd/h5/a/@href').extract()
+        for news_url in news_list:
+            try:
+                print(sel.response.url, news_url)
+                yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+            except Exception as e:
+                print(e)
+                continue
+
+    def parse_detail(self, response):
+
+        sel = Selector(response)
+
+        news_item = CrawlerAffairItem()
+        spider_time = str(int(time.time()))
+
+        publish_time = sel.xpath('//div[@class="article-info"]/p/span[@class="article-timestamp ml10"]/text()').extract_first()
+
+        title = sel.xpath('//div[@class="article-title"]/h1/text()').extract()
+        contents = sel.xpath('//div[@class="article-content"]/p/text()').extract()
+        labels = sel.xpath('//div[@class="fl ml10 article-tags"]/a/text()').extract()
+
+        news_item["spider_time"] = spider_time
+        news_item["publish_time"] = process_time(publish_time)
+        news_item["title"] = process_title(title)
+        news_item["label"] = process_label(labels)
+        news_item["content"] = process_content(contents)
+        news_item['url'] = sel.response.url.strip()
+
+        return news_item
 
 def process_title(title):
     """
@@ -175,6 +235,12 @@ def process_title(title):
     """
     if len(title)>=1:
         title = title[0].strip()
+        # remove \n\t and space
+        # title = ''.join([t.group() for t in title])
+        title = title.replace('\n', '')
+        title = title.replace('\t', '')
+        title = title.replace(' ', '')
+
     else:
         title = ''
     return title
@@ -223,7 +289,4 @@ def process_time(local_time):
 
 if __name__ == "__main__":
     local_time = "1970-01-01 08:00:00"
-    print(process_time(local_time))
-
-
 
