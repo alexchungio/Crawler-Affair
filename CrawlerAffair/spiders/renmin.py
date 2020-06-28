@@ -9,74 +9,82 @@
 # @ Time       : 2020/6/22 上午10:35
 # @ Software   : PyCharm
 #-------------------------------------------------------
-
+import re
+import time
 import scrapy
-from selenium import webdriver
 from scrapy.selector import Selector
+
+from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
 
-class DoubanBookSpider(scrapy.Spider):
-    name = "douban_book"
-    allowed_domains = ["book.douban.com"]
-    def __init__(self, *args, **kwargs):
-        super(DoubanBookSpider, self).__init__(*args, **kwargs)
-        self.start_urls = ['https://book.douban.com/latest?icn=index-latestbook-all']
+
+class RenminPoliticsSpider(scrapy.Spider):
+    name = "renmin_politics_spider"
+    allowed_domains = ["people.com.cn"]
+
+    def start_requests(self):
+        urls = ['http://politics.people.com.cn/']
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
 
     # parse web html
-    # def parse(self, response):
-    #     filename = "douban_book.html"
-    #     with open(filename, 'wb') as wf:
-    #         wf.write(response.body)
-
     def parse(self, response):
         sel = Selector(response)
-        book_list = sel.xpath('//ul[@class="cover-col-4 clearfix"]/li')
-        for book_ele in book_list:
-            book_item = DoubanBookItem()
-            # 书籍背景图片地址
-            cover_url = book_ele.xpath('./a[@class="cover"]/img/@src').extract()[0]
-            # 书籍详细页地址
-            url = book_ele.xpath('./a[@class="cover"]/@href').extract()[0]
-            # 书籍名称
-            book_name = book_ele.xpath('./div[@class="detail-frame"]/h2/a/text()').extract()[0]
-            # 书籍作者，我们发现这样获取到的信息包含了书籍作者、出版社和发布时间三个值，
-            # 比如"[美] 彼得·布雷瓦 / 后浪丨文化发展出版社 / 2017-11"，它们是通过/进行累加的
-            book_author_str = book_ele.xpath('./div[@class="detail-frame"]//p[@class="color-gray"]/text()').extract()[0]
-            book_author_array = book_author_str.split("/")
-            book_author = book_author_array[0].strip()
-            # 发布时间
-            publish_time = book_author_array[2].strip()
-            # 书籍介绍
-            book_detail = book_ele.xpath('./div[@class="detail-frame"]//p[@class="detail"]/text()').extract()[0]
-            book_item["cover_url"] = cover_url.strip()
-            book_item["url"] = url.strip()
-            book_item["book_name"] = book_name.strip()
-            book_item["book_author"] = book_author.strip()
-            book_item["publish_time"] = publish_time.strip()
-            book_item["book_detail"] = book_detail.strip()
+        custom_menu = ["本网原创", "高层动态", "中央部委", "反腐倡廉", "时事解读"]
+        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        menu_list = sel.xpath('//div[@class="pd_nav w1000 white mt15"]/a')
+        for menu_url in menu_list:
+            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+                continue
+            else:
 
-            # 进到书籍详细页去获取书籍页数和价格信息
-            yield scrapy.Request(url=url, meta={'book_item': book_item}, callback=self.parse_detail)
+                url = menu_url.xpath('./@href').extract_first()
+                print(url)
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_menu_page)
 
-        # 书籍详细页
+    def parse_menu_page(self, response):
+
+        sel = Selector(response)
+        base_url = '/'.join(sel.response.url.split('/')[:-1])
+        page_list = [sel.response.url]
+        sub_list = sel.xpath('//*[@class="page_n clearfix"]/a/@href').extract()[:-1]
+        page_list.extend([base_url+'/'+url for url in sub_list])
+        for page_url in page_list:
+            yield scrapy.Request(url=page_url, meta=None, callback=self.parse_sub_page)
+
+    def parse_sub_page(self, response):
+
+        sel = Selector(response)
+        base_url = '/'.join(sel.response.url.split('/')[:-3])
+        sub_news_list = sel.xpath('//div[@class="ej_list_box clear"]/ul/li/a/@href').extract()
+        news_list = [base_url+'/'+url for url in sub_news_list]
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
 
     def parse_detail(self, response):
-        # response.meta.get("book_item", "")
-        book_item = response.meta['book_item']
-        sel = Selector(response)
-        # 书籍页数
-        book_page_num_str = sel.xpath(u'//div[@id="info"]//span[text()="页数:"]').extract()
-        if book_page_num_str:
-            book_page_num = sel.xpath(u'//div[@id="info"]//span[text()="页数:"]/following::text()[1]').extract()[0]
-        else:
-            book_page_num = ''
-        # 书籍价格
-        book_price_str = sel.xpath(u'//div[@id="info"]//span[text()="定价:"]').extract()
-        if book_price_str:
-            book_price = sel.xpath(u'//div[@id="info"]//span[text()="定价:"]/following::text()[1]').extract()[0]
-        else:
-            book_price = ''
 
-        book_item["book_page_num"] = book_page_num.strip()
-        book_item["book_price"] = book_price.strip()
-        yield book_item
+        sel = Selector(response)
+
+        news_item = CrawlerAffairItem()
+        spider_time = str(int(time.time()))
+
+
+        publish_time = sel.xpath('//div[@class ="box01"]/div[@class="fl"]/text()').extract_first()
+        title = sel.xpath('//div[@class="clearfix w1000_320 text_title"]/h1/text()').extract()
+        contents = sel.xpath('//*[@id="rwb_zw"]/p/text()').extract()
+        labels = []
+
+        news_item["spider_time"] = spider_time
+        news_item["publish_time"] = process_time(publish_time)
+        news_item["title"] = process_title(title)
+        news_item["label"] = process_label(labels)
+        news_item["content"] = process_content(contents)
+        news_item['url'] = sel.response.url.strip()
+
+        return news_item
+
+
+
+if __name__ == "__main__":
+    pass
