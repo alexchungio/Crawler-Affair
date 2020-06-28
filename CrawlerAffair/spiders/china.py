@@ -157,7 +157,6 @@ class ChinaAffairSpider(scrapy.Spider):
         return news_item
 
 
-
 class ChinaOpinionSpider(scrapy.Spider):
     name = "china_opinion_spider"
     allowed_domains = ["china.com.cn"]
@@ -199,10 +198,8 @@ class ChinaOpinionSpider(scrapy.Spider):
         news_list = sel.xpath('//ul[@class="opinion-list-2 pt50"]/li/dl/dd/h5/a/@href').extract()
         for news_url in news_list:
             try:
-                print(sel.response.url, news_url)
                 yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
             except Exception as e:
-                print(e)
                 continue
 
     def parse_detail(self, response):
@@ -226,6 +223,82 @@ class ChinaOpinionSpider(scrapy.Spider):
         news_item['url'] = sel.response.url.strip()
 
         return news_item
+
+
+class ChinaTheorySpider(scrapy.Spider):
+    name = "china_theory_spider"
+    allowed_domains = ["china.com.cn"]
+
+    def start_requests(self):
+        urls = ['http://www.china.com.cn/opinion/theory/']
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    # parse web html
+    def parse(self, response):
+        sel = Selector(response)
+        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        iframe_url = sel.xpath('//*[@id="cTop"]').extract_first()
+
+        regex = re.compile("http://[^\s]*.htm")
+        url = regex.findall(iframe_url)[0]
+
+        yield scrapy.Request(url=url, meta={"base_url": sel.response.url}, callback=self.parse_iframe)
+
+    def parse_iframe(self, response):
+
+        sel = Selector(response)
+        base_url = sel.response.meta["base_url"]
+        custom_menu = ["理论热点", "高层声音", "媒体社论"]
+        menu_list = sel.xpath('//div[@class="nav"]/ul/li/a')
+        for menu_url in menu_list:
+            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+                continue
+            else:
+                url = menu_url.xpath('./@href').extract_first()
+                url = base_url + url
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_menu_page)
+
+    def parse_menu_page(self, response):
+
+        sel = Selector(response)
+        page_list = [sel.response.url]
+        page_list.extend(sel.xpath('//div[@class="leftbox"]/div/center/a/@href').extract())
+        for page_url in page_list:
+            yield scrapy.Request(url=page_url, meta=None, callback=self.parse_sub_page)
+
+    def parse_sub_page(self, response):
+
+        sel = Selector(response)
+
+        news_list = sel.xpath('//div[@class="leftbox"]/ul/li/a/@href').extract()
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+
+    def parse_detail(self, response):
+
+        sel = Selector(response)
+
+        news_item = CrawlerAffairItem()
+        spider_time = str(int(time.time()))
+
+        publish_time = sel.xpath('//div[@class="info"]/div[@class="pub_date"]/*[@id="pubtime_baidu"]/text()').extract_first()
+
+        title = sel.xpath('//div[@class="leftbox"]/h1[@class="artTitle"]/text()').extract()
+        contents = sel.xpath('//div[@class="info"]/div[@id="artbody"]/p/text()').extract()
+        labels = []
+
+        news_item["spider_time"] = spider_time
+        news_item["publish_time"] = process_time(publish_time)
+        news_item["title"] = process_title(title)
+        news_item["label"] = process_label(labels)
+        news_item["content"] = process_content(contents)
+        news_item['url'] = sel.response.url.strip()
+
+        return news_item
+
+
 
 def process_title(title):
     """
