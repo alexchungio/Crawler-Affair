@@ -48,7 +48,7 @@ class XinhuaPoliticsSpider(scrapy.Spider):
     def parse(self, response):
         sel = Selector(response)
 
-        custom_menu = ["时政首页"]
+        custom_menu = ["时政首页", "新观察"]
         # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
         menu_list = sel.xpath('//div[@class="nav domPC"]/div[@class="widthMain"]/a')
         # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
@@ -86,7 +86,6 @@ class XinhuaPoliticsSpider(scrapy.Spider):
         news_item["label"] = process_label(labels)
         news_item["content"] = process_content(contents)
         news_item['url'] = sel.response.url.strip()
-
 
         return news_item
 
