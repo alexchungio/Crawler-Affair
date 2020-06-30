@@ -48,7 +48,10 @@ def process_content(contents):
     :param contents:
     :return:
     """
-    content = "\n".join([content.strip() for content in contents])
+
+    content = '\n'.join([content.strip() for content in contents if content != ''])
+
+
     return content
 
 
