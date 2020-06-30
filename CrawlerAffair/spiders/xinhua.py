@@ -22,10 +22,10 @@ from CrawlerAffair.utils import process_title, process_time, process_content, pr
 from CrawlerAffair.items import CrawlerAffairItem
 
 # 无头浏览器设置
-chorme_options = Options()
-# chorme_options.add_argument("--headless")
-chorme_options.add_argument("--disable-gpu")
-# chrome_options.add_argument('--no-sandbox')
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument('--no-sandbox')
 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
 
@@ -33,8 +33,7 @@ class XinhuaPoliticsSpider(scrapy.Spider):
     name = "xinhua_politics_spider"
     allowed_domains = ["news.cn", "xinhuanet.com"]
 
-
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chorme_options)
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         urls = ['http://www.news.cn/politics/']
@@ -90,7 +89,6 @@ class XinhuaPoliticsSpider(scrapy.Spider):
 
 
         return news_item
-
 
 
 # 爬不到数据
