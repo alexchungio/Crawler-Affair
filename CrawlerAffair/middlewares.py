@@ -152,7 +152,7 @@ class XinhuaMiddleware(object):
         # chrome_options.add_argument('--disable-gpu')
         # chrome_options.add_argument('--no-sandbox')
 
-        if request.url in ["http://www.news.cn/politics/index.htm"]:
+        if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm"]:
             spider.browser.get(url=request.url)
             load_more = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
             if len(load_more) != 0:
