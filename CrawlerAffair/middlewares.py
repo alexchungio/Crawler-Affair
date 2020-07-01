@@ -137,9 +137,9 @@ class XinhuaMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        # if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
-        #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
-        if request.url in ['http://www.news.cn/local/index.htm']:
+        if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
+                           'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
+
             spider.browser.get(url=request.url)
             more_btn = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
             more_link = spider.browser.find_elements_by_xpath('//*[@class ="moreLink"]')
@@ -192,7 +192,7 @@ class XinhuaMiddleware(object):
         #     html = spider.browser.page_source
         #     return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf8", request=request)  # 参数url指当前浏览器访问的url(通过current_url方法获取), 在这里参数url也可以用request.url
 
-        response = scrapy.http.HtmlResponse(url=response.url, body=response.body, encoding="utf-8")
+        # response = scrapy.http.HtmlResponse(url=response.url, body=response.body, encoding="utf-8")
         return response
 
 
