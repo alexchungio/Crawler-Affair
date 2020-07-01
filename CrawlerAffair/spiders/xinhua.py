@@ -23,7 +23,7 @@ from CrawlerAffair.items import CrawlerAffairItem
 
 # 无头浏览器设置
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
@@ -108,7 +108,7 @@ class XinhuaLocalSpider(scrapy.Spider):
     def parse(self, response):
         sel = Selector(response)
 
-        custom_menu = ["地方首页"]
+        custom_menu = ["地方首页", "微观中国"]
         # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
         menu_list = sel.xpath('//div[@class="nav domPC"]/div[@class="widthMain"]/a')
         # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
