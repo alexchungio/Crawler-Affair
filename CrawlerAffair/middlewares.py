@@ -137,7 +137,31 @@ class XinhuaMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-       return None
+        # if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
+        #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
+        if request.url in ['http://www.news.cn/local/index.htm']:
+            spider.browser.get(url=request.url)
+            more_btn = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
+            more_link = spider.browser.find_elements_by_xpath('//*[@class ="moreLink"]')
+
+            if len(more_btn) != 0:
+                click_element = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
+            else:
+                click_element = spider.browser.find_element_by_xpath('//*[@class ="moreLink"]')
+
+
+            if len(more_btn) or len(more_link) != 0:
+                while True:
+                    try:
+                        load_more = click_element
+                        load_more.click()
+                        time.sleep(self.delay_time)
+                    except ElementNotInteractableException:
+                        break
+            # return selenium response
+            html = spider.browser.page_source
+            return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
+                                            request=request)
 
 
     def process_response(self, request, response, spider):
@@ -152,24 +176,25 @@ class XinhuaMiddleware(object):
         # chrome_options.add_argument('--disable-gpu')
         # chrome_options.add_argument('--no-sandbox')
 
-        if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm"]:
-            spider.browser.get(url=request.url)
-            load_more = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
-            if len(load_more) != 0:
-                while True:
-                    try:
-                        load_more = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
-                        load_more.click()
-                        time.sleep(self.delay_time)
-                    except ElementNotInteractableException:
-                        break
-            # return selenium response
-            html = spider.browser.page_source
-            return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf8", request=request)  # 参数url指当前浏览器访问的url(通过current_url方法获取), 在这里参数url也可以用request.url
+        # if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
+        #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
+        #     spider.browser.get(url=request.url)
+        #     load_more = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
+        #     if len(load_more) != 0:
+        #         while True:
+        #             try:
+        #                 load_more = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
+        #                 load_more.click()
+        #                 time.sleep(self.delay_time)
+        #             except ElementNotInteractableException:
+        #                 break
+        #     # return selenium response
+        #     html = spider.browser.page_source
+        #     return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf8", request=request)  # 参数url指当前浏览器访问的url(通过current_url方法获取), 在这里参数url也可以用request.url
 
-        else:
-            # return raw response
-            return response
+        response = scrapy.http.HtmlResponse(url=response.url, body=response.body, encoding="utf-8")
+        return response
+
 
 
     def process_exception(self, request, exception, spider):
