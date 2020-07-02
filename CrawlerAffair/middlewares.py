@@ -12,9 +12,7 @@ from scrapy import signals
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import ElementNotInteractableException
-from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider, XinhuaLocalSpider, XinhualegalSpider, XinhuaRenshiSpider, XinhuaInfoSpider
-
-
+from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider, XinhuaLocalSpider, XinhualegalSpider, XinhuaRenshiSpider, XinhuaInfoSpider,XinhuaSilkRoad
 
 
 class CrawleraffairSpiderMiddleware:
@@ -142,7 +140,7 @@ class XinhuaMiddleware(object):
         #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
 
         if spider.name in [XinhuaPoliticsSpider.name, XinhuaPoliticsSpider.name, XinhuaLocalSpider.name, XinhualegalSpider.name,
-                           XinhuaRenshiSpider.name, XinhuaInfoSpider.name, XinhuaInfoSpider.name]:
+                           XinhuaRenshiSpider.name, XinhuaInfoSpider.name, XinhuaInfoSpider.name, XinhuaSilkRoad.name]:
 
             if request.url in spider.urls:
                 spider.browser.get(url=request.url)
@@ -154,21 +152,20 @@ class XinhuaMiddleware(object):
                     time.sleep(self.delay_time)
 
                     more_btn = spider.browser.find_elements_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/*[@id="dataMoreBtn"]')
-                    more_link = spider.browser.find_elements_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/*[@class ="dataMoreLink"]')
+                    more_link = spider.browser.find_elements_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/*[@id="dataMoreLink"]')
 
                     if len(more_btn) != 0:
                         click_element = spider.browser.find_element_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/li[@id="dataMoreBtn"]')
                     else:
-                        click_element = spider.browser.find_element_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/li[@class ="dataMoreLink"]')
+                        click_element = spider.browser.find_element_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/li[@id="dataMoreLink"]')
 
                 else:
-                    more_btn = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
-                    more_link = spider.browser.find_elements_by_xpath('//*[@class ="moreLink"]')
-
+                    more_btn = spider.browser.find_elements_by_xpath('//*[@id="dataMoreBtn"]')
+                    more_link = spider.browser.find_elements_by_xpath('//*[@id="dataMoreLink"]')
                     if len(more_btn) != 0:
-                        click_element = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
+                        click_element = spider.browser.find_element_by_xpath('//*[@id="dataMoreBtn"]')
                     else:
-                        click_element = spider.browser.find_element_by_xpath('//*[@class ="moreLink"]')
+                        click_element = spider.browser.find_element_by_xpath('//*[@id="dataMoreLink"]')
 
 
                 if len(more_btn) or len(more_link) != 0:
