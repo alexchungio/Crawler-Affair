@@ -17,13 +17,15 @@ import scrapy
 from scrapy.selector import Selector
 from selenium import webdriver
 from  selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
 
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
 
+
 # 无头浏览器设置
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
@@ -32,12 +34,13 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 class XinhuaPoliticsSpider(scrapy.Spider):
     name = "xinhua_politics_spider"
     allowed_domains = ["news.cn", "xinhuanet.com"]
+    urls = ['http://www.news.cn/politics/', "http://www.news.cn/local/wgzg.htm"]
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
-        urls = ['http://www.news.cn/politics/', "http://www.news.cn/local/wgzg.htm"]
-        for url in urls:
+
+        for url in self.urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     # 整个爬虫结束后关闭浏览器
@@ -89,21 +92,26 @@ class XinhuaPoliticsSpider(scrapy.Spider):
 
         return news_item
 
-class XinhuaLocalSpider(scrapy.Spider):
-    name = "xinhua_local_spider"
+
+class XinhuaCommonSpider(scrapy.Spider):
+    """
+    xin hua general spider
+    """
+    name = ""
+    urls = []
     allowed_domains = ["news.cn", "xinhuanet.com"]
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
-        urls = ['http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']
+        urls = self.urls
         for url in urls:
             yield scrapy.Request(url=url, meta=None, callback=self.parse)
 
     # 整个爬虫结束后关闭浏览器
-    # def close(self, spider):
-    #     self.browser.quit()
+    def close(self, spider):
+        self.browser.quit()
 
     # parse web html
     def parse(self, response):
@@ -156,12 +164,47 @@ class XinhuaLocalSpider(scrapy.Spider):
         return news_item
 
 
+class XinhuaLocalSpider(XinhuaCommonSpider):
+
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+    name = "xinhua_local_spider"
+    urls = ['http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']
+
+
+class XinhualegalSpider(XinhuaCommonSpider):
+    name = "xinhua_legal_spider"
+    urls = ["http://www.news.cn/legal/index.htm", "http://www.news.cn/legal/fy.htm", "http://www.news.cn/legal/ffu.htm"]
+
+class XinhuaRenshiSpider(XinhuaCommonSpider):
+    name= "xinhua_renshi_spider"
+    urls = ["http://www.xinhuanet.com/politics/rs.htm"]
+
+
+class XinhuaInfoSpider(XinhuaCommonSpider):
+    name = "xinhua_info_spider"
+    # urls = ["http://www.news.cn/info/index.htm", "http://www.news.cn/info/tx.htm", "http://www.news.cn/info/ydhlw.htm"]
+    urls = ["http://www.news.cn/info/index.htm"]
+    allowed_domains = ["news.cn", "xinhuanet.com"]
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser.get(urls[0])
+
+    def start_requests(self):
+        # 'http://www.news.cn/local/wgzg.htm'
+
+        for index in range(1, 5):
+            menu_switch = self.browser.find_element_by_xpath(f'//ul[@class="showBody clearfix"]/li[@data-index="{index}"]')
+            ActionChains(self.browser).move_to_element(menu_switch).perform()
+            yield scrapy.Request(url=self.urls[0], meta=None, callback=self.parse)
+
 
 # 爬不到数据
-# 前后域名发生变化， 导致爬取页面的域名没有包含在all_domain 中
+# 前后域名发生变化， 导致爬取页面的域名没有包含在all_domain 中，从而导致页面爬取失败
+# 解决： 将字页面域名手动添加到allow_domain 中
 
 
 # 调用两次url, 获取失败
 # no more duplicates will be shown (see DUPEFILTER_DEBUG to show all duplicates
 # scrapy.Request 中的dont_filter 会自动过滤重复页面， 默认值为dont_filter=false, 因此会执行过滤操作
-# 为了进行两次爬取，设置dont_filter=True
+# 解决：为了进行两次爬取，设置dont_filter=True
