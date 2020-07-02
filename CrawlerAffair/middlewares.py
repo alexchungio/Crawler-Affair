@@ -12,8 +12,9 @@ from scrapy import signals
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import ElementNotInteractableException
+from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider, XinhuaLocalSpider, XinhualegalSpider, XinhuaRenshiSpider, XinhuaInfoSpider
 
-from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider
+
 
 
 class CrawleraffairSpiderMiddleware:
@@ -137,31 +138,50 @@ class XinhuaMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
-                           'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
+        # if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
+        #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
 
-            spider.browser.get(url=request.url)
-            more_btn = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
-            more_link = spider.browser.find_elements_by_xpath('//*[@class ="moreLink"]')
+        if spider.name in [XinhuaPoliticsSpider.name, XinhuaPoliticsSpider.name, XinhuaLocalSpider.name, XinhualegalSpider.name,
+                           XinhuaRenshiSpider.name, XinhuaInfoSpider.name, XinhuaInfoSpider.name]:
 
-            if len(more_btn) != 0:
-                click_element = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
-            else:
-                click_element = spider.browser.find_element_by_xpath('//*[@class ="moreLink"]')
+            if request.url in spider.urls:
+                spider.browser.get(url=request.url)
+                # switch menu
+                if spider.name in [XinhuaInfoSpider.name] and spider.index:
+                    menu_switch = spider.browser.find_element_by_xpath(
+                        f'//ul[@class="showBody clearfix"]/li[@data-index="{spider.index}"]')
+                    menu_switch.click()
+                    time.sleep(self.delay_time)
+
+                    more_btn = spider.browser.find_elements_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/*[@id="dataMoreBtn"]')
+                    more_link = spider.browser.find_elements_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/*[@class ="dataMoreLink"]')
+
+                    if len(more_btn) != 0:
+                        click_element = spider.browser.find_element_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/li[@id="dataMoreBtn"]')
+                    else:
+                        click_element = spider.browser.find_element_by_xpath(f'//ul[@id="showData{int(spider.index-1)}"]/li[@class ="dataMoreLink"]')
+
+                else:
+                    more_btn = spider.browser.find_elements_by_xpath('//*[@class="moreBtn"]')
+                    more_link = spider.browser.find_elements_by_xpath('//*[@class ="moreLink"]')
+
+                    if len(more_btn) != 0:
+                        click_element = spider.browser.find_element_by_xpath('//*[@class="moreBtn"]')
+                    else:
+                        click_element = spider.browser.find_element_by_xpath('//*[@class ="moreLink"]')
 
 
-            if len(more_btn) or len(more_link) != 0:
-                while True:
-                    try:
-                        load_more = click_element
-                        load_more.click()
-                        time.sleep(self.delay_time)
-                    except ElementNotInteractableException:
-                        break
-            # return selenium response
-            html = spider.browser.page_source
-            return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
-                                            request=request)
+                if len(more_btn) or len(more_link) != 0:
+                    while True:
+                        try:
+                            click_element.click()
+                            time.sleep(self.delay_time)
+                        except ElementNotInteractableException:
+                            break
+                # return selenium response
+                html = spider.browser.page_source
+                return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
+                                                request=request)
 
 
     def process_response(self, request, response, spider):
@@ -209,3 +229,5 @@ class XinhuaMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
