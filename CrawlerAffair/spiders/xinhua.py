@@ -25,7 +25,7 @@ from CrawlerAffair.items import CrawlerAffairItem
 
 # 无头浏览器设置
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
@@ -188,15 +188,52 @@ class XinhuaInfoSpider(XinhuaCommonSpider):
     allowed_domains = ["news.cn", "xinhuanet.com"]
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-    browser.get(urls[0])
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
-
         for index in range(1, 5):
-            menu_switch = self.browser.find_element_by_xpath(f'//ul[@class="showBody clearfix"]/li[@data-index="{index}"]')
-            ActionChains(self.browser).move_to_element(menu_switch).perform()
-            yield scrapy.Request(url=self.urls[0], meta=None, callback=self.parse)
+            self.index = index
+            # ActionChains(self.browser).move_to_element(menu_switch).perform()
+            yield scrapy.Request(url=self.urls[0], meta=None, callback=self.parse, dont_filter=True)
+
+
+class XinhuaSilkRoad(XinhuaCommonSpider):
+    name = "xinhua_siklroad_spider"
+    # urls = ["http://www.news.cn/info/index.htm", "http://www.news.cn/info/tx.htm", "http://www.news.cn/info/ydhlw.htm"]
+    urls = []
+
+
+    def start_requests(self):
+        urls = ["http://www.news.cn/silkroad/index.htm"]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    # parse web html
+    def parse(self, response):
+        sel = Selector(response)
+
+        custom_menu = ["丝路聚焦", "中国议程", "深度透视", "丝路智库", "丝路商机", "丝路国际", "丝路中国", "丝路旅游"]
+        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        menu_list = sel.xpath('//div[@class="silkroad-nav"]/ul/li/a')
+        # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
+        for menu_url in menu_list:
+            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+                continue
+            else:
+                sub_url = menu_url.xpath('./@href').extract_first()
+                url = sel.response.urljoin(sub_url)
+                self.urls.append(url)
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page)
+
+    def parse_sub_page(self, response):
+
+        sel = Selector(response)
+        news_list = sel.xpath('//ul[@id="showData0"]/li/h3/a/@href').extract()
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+
+
 
 
 # 爬不到数据
@@ -208,3 +245,5 @@ class XinhuaInfoSpider(XinhuaCommonSpider):
 # no more duplicates will be shown (see DUPEFILTER_DEBUG to show all duplicates
 # scrapy.Request 中的dont_filter 会自动过滤重复页面， 默认值为dont_filter=false, 因此会执行过滤操作
 # 解决：为了进行两次爬取，设置dont_filter=True
+
+# 每次点击事件之后必须控制延时，否则会由于页面无法及晒刷新而导致
