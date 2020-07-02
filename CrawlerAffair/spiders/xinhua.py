@@ -25,72 +25,11 @@ from CrawlerAffair.items import CrawlerAffairItem
 
 # 无头浏览器设置
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
-
-class XinhuaPoliticsSpider(scrapy.Spider):
-    name = "xinhua_politics_spider"
-    allowed_domains = ["news.cn", "xinhuanet.com"]
-    urls = ['http://www.news.cn/politics/', "http://www.news.cn/local/wgzg.htm"]
-
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-
-    def start_requests(self):
-
-        for url in self.urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    # 整个爬虫结束后关闭浏览器
-    def close(self, spider):
-        self.browser.quit()
-
-    # parse web html
-    def parse(self, response):
-        sel = Selector(response)
-
-        custom_menu = ["时政首页"]
-        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
-        menu_list = sel.xpath('//div[@class="nav domPC"]/div[@class="widthMain"]/a')
-        # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
-        for menu_url in menu_list:
-            if menu_url.xpath('./text()').extract_first() not in custom_menu:
-                continue
-            else:
-                sub_url = menu_url.xpath('./@href').extract_first()
-                url = sel.response.urljoin(sub_url)
-                yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page)
-
-    def parse_sub_page(self, response):
-
-        sel = Selector(response)
-        news_list = sel.xpath('//ul[@class="dataList"]/li/h3/a/@href').extract()
-        for news_url in news_list:
-            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
-            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
-
-    def parse_detail(self, response):
-
-        sel = Selector(response)
-
-        news_item = CrawlerAffairItem()
-        spider_time = str(int(time.time()))
-
-        publish_time = sel.xpath('//div[@class="h-news"]/div[@class="h-info"]/span/text()').extract_first()
-        title = sel.xpath('//div[@class="h-news"]/div[class="h-title"]/text()').extract()
-        contents = sel.xpath('//div[@id="p-detail"]/p/text()').extract()
-        labels = []
-
-        news_item["spider_time"] = spider_time
-        news_item["publish_time"] = process_time(publish_time)
-        news_item["title"] = process_title(title)
-        news_item["label"] = process_label(labels)
-        news_item["content"] = process_content(contents)
-        news_item['url'] = sel.response.url.strip()
-
-        return news_item
 
 
 class XinhuaCommonSpider(scrapy.Spider):
@@ -162,6 +101,11 @@ class XinhuaCommonSpider(scrapy.Spider):
         news_item['url'] = sel.response.url.strip()
 
         return news_item
+
+
+class XinhuaPoliticsSpider(XinhuaCommonSpider):
+    name = "xinhua_politics_spider"
+    urls = ['http://www.news.cn/politics/index.htm', 'http://www.news.cn/politics/xgc.htm']
 
 
 class XinhuaLocalSpider(XinhuaCommonSpider):
