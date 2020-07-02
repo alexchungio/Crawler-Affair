@@ -96,9 +96,10 @@ class XinhuaLocalSpider(scrapy.Spider):
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
-        urls = ['http://www.news.cn/local/index.htm']
+        # 'http://www.news.cn/local/wgzg.htm'
+        urls = ['http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield scrapy.Request(url=url, meta=None, callback=self.parse)
 
     # 整个爬虫结束后关闭浏览器
     # def close(self, spider):
@@ -106,19 +107,24 @@ class XinhuaLocalSpider(scrapy.Spider):
 
     # parse web html
     def parse(self, response):
-        sel = Selector(response)
+        # sel = Selector(response)
 
-        custom_menu = ["地方首页", "微观中国"]
-        # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
-        menu_list = sel.xpath('//div[@class="nav domPC"]/div[@class="widthMain"]/a')
-        # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
-        for menu_url in menu_list:
-            if menu_url.xpath('./text()').extract_first() not in custom_menu:
-                continue
-            else:
-                sub_url = menu_url.xpath('./@href').extract_first()
-                url = sel.response.urljoin(sub_url)
-                yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page, dont_filter=True)
+        # custom_menu = ["地方首页", "微观中国"]
+        # # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
+        # menu_list = sel.xpath('//div[@class="nav domPC"]/div[@class="widthMain"]/a')
+        # # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
+        # for menu_url in menu_list:
+        #     if menu_url.xpath('./text()').extract_first() not in custom_menu:
+        #         continue
+        #     else:
+        #         sub_url = menu_url.xpath('./@href').extract_first()
+        #         url = sel.response.urljoin(sub_url)
+        #         yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page, dont_filter=True)
+        sel = Selector(response)
+        news_list = sel.xpath('//ul[@class="dataList"]/li/h3/a/@href').extract()
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
 
     def parse_sub_page(self, response):
 
