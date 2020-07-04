@@ -69,6 +69,7 @@ CONCURRENT_REQUESTS = 16
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
    'CrawlerAffair.middlewares.XinhuaMiddleware': 543,
+   'CrawlerAffair.middlewares.CCTVMiddleware': 544,
 }
 
 # Enable or disable extensions
@@ -106,3 +107,4 @@ AUTOTHROTTLE_START_DELAY = 3
 
 PATH = '/home/alex/python_code/CrawlerAffair/data'
 DELAY_TIME = 0.1
+MAX_PAGE = 200
