@@ -106,5 +106,5 @@ AUTOTHROTTLE_START_DELAY = 3
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 PATH = '/home/alex/python_code/CrawlerAffair/data'
-DELAY_TIME = 0.1
+DELAY_TIME = 1
 MAX_PAGE = 200
