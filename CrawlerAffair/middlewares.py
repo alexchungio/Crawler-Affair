@@ -11,9 +11,10 @@ import scrapy
 from scrapy import signals
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
 from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider, XinhuaLocalSpider, XinhualegalSpider, XinhuaRenshiSpider, XinhuaInfoSpider,XinhuaSilkRoad
-from CrawlerAffair.spiders.cctv import CCTVNewsSpider
+from CrawlerAffair.spiders.cctv import CCTVNewsSpider, CCTVCaijingSpider
+from CrawlerAffair.utils import scroll
 
 class CrawleraffairSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -262,25 +263,42 @@ class CCTVMiddleware(object):
         #   installed downloader middleware will be called
         # if request.url in ["http://www.news.cn/politics/index.htm", "http://www.xinhuanet.com/politics/xgc.htm",
         #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
-
-        if spider.name in [CCTVNewsSpider.name]:
+        from selenium.webdriver.common.action_chains import ActionChains
+        if spider.name in [CCTVNewsSpider.name, CCTVCaijingSpider.name]:
 
             if request.url in spider.urls:
                 spider.browser.get(url=request.url)
+                time.sleep(1)
                 # switch menu
-                more_btn = spider.browser.find_elements_by_xpath('//div[@class="more"]')
-                click_element = spider.browser.find_element_by_xpath('//div[@class="more"]')
+                more_btn = None
+                click_element = None
+                if spider.name == CCTVNewsSpider.name:
+                    more_btn = spider.browser.find_elements_by_xpath('//div[@class="more"]')
+                elif spider.name == CCTVCaijingSpider.name:
+                    more_btn = spider.browser.find_elements_by_xpath('//div[@id="open_box"]')
+
                 if len(more_btn)!= 0:
-                    while True:
+                    while self.max_page > 0:
                         try:
-                            if self.max_page > 0:
-                                click_element.click()
-                                time.sleep(self.delay_time)
-                                self.max_page -= 1
-                            else:
+                            # js = 'var q=document.documentElement.scrollTop=8000'
+                            # spider.browser.execute_script(js)
+                            # time.sleep(2)
+                            scroll(driver=spider.browser, sleep_time=0.2)
+                            # click_element.click()
+                            # js = 'document.getElementById("open_box").click()'
+                            # spider.browser.execute_script(js)
+                            click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
+                            if click_element.text == "没有更多数据":
                                 break
-                        except ElementNotInteractableException:
-                            break
+                            ActionChains(spider.browser).click(click_element).perform()
+                            time.sleep(self.delay_time)
+                            self.max_page -= 1
+                        # except ElementNotInteractableException:
+                        #     break
+                        # except StaleElementReferenceException:
+                        #     break
+                        except Exception as e:
+                            print(e)
                 # return selenium response
                 html = spider.browser.page_source
                 return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
