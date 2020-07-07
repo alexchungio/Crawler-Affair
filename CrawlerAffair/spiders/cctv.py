@@ -59,7 +59,7 @@ class CCTVNewsSpider(scrapy.Spider):
         sel = Selector(response)
 
 
-        custom_menu = ["国内", "国际", "社会", "法治",  "文娱", "科技", "生活", "人物", "军事"]
+        custom_menu = ["国内", "国际", "社会", "法治",  "文娱", "科技", "生活", "人物"]
         # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
         menu_list = sel.xpath('//div[@class="nav_list"]/div[@class="left"]/div/span/a')
         # sub_menu_list = sel.xpath('/html/body/div[7]/div/a')
@@ -129,7 +129,8 @@ class CCTVShipingSpider(scrapy.Spider):
             yield scrapy.Request(url=sel.response.url, meta=None, callback=self.parse_sub_page, dont_filter=True)
             scroll(self.browser)
             next_page = self.browser.find_element_by_xpath('//span[@class="tpb_right"]/a[contains(text(), ">")]')
-            next_page.click()
+            self.browser.execute_script("arguments[0].click();", next_page)
+            time.sleep(1)
 
     def parse_sub_page(self, response):
 
