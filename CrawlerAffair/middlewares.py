@@ -276,6 +276,7 @@ class CCTVMiddleware(object):
                     more_btn = spider.browser.find_elements_by_xpath('//div[@class="more"]')
                 elif spider.name == CCTVCaijingSpider.name:
                     more_btn = spider.browser.find_elements_by_xpath('//div[@id="open_box"]')
+                    # click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
 
                 if len(more_btn)!= 0:
                     while self.max_page > 0:
@@ -287,18 +288,23 @@ class CCTVMiddleware(object):
                             # click_element.click()
                             # js = 'document.getElementById("open_box").click()'
                             # spider.browser.execute_script(js)
-                            click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
-                            if click_element.text == "没有更多数据":
-                                break
+                            if spider.name == CCTVNewsSpider.name:
+                                if len(spider.browser.find_elements_by_xpath('//div[@class="more"]')) != 0:
+                                    click_element = spider.browser.find_element_by_xpath('//div[@class="more"]')
+                                else:
+                                    break
+                            if spider.name == CCTVCaijingSpider.name:
+                                click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
+                                if click_element.text == "没有更多数据":
+                                    break
                             ActionChains(spider.browser).click(click_element).perform()
                             time.sleep(self.delay_time)
                             self.max_page -= 1
-                        # except ElementNotInteractableException:
-                        #     break
-                        # except StaleElementReferenceException:
-                        #     break
-                        except Exception as e:
-                            print(e)
+                        except ElementNotInteractableException:
+                            break
+                        except StaleElementReferenceException:
+                            break
+
                 # return selenium response
                 html = spider.browser.page_source
                 return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
@@ -347,5 +353,13 @@ class CCTVMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+
+# 点击查看更多 无法获取元素element
+# 解决: 需要模拟人工操作，将页面拉到最下面，利用scroll进行滚动，然后再进行获取
+
+# 点击查看更多，只能成功一次，后面又无法获取到元素element
+# 解决: 将获取element 操作写入循环操作，每次滚动完，从新获取元素element，再进行点击
 
 
