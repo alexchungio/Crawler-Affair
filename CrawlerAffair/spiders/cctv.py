@@ -58,7 +58,6 @@ class CCTVNewsSpider(scrapy.Spider):
     def parse(self, response):
         sel = Selector(response)
 
-
         custom_menu = ["国内", "国际", "社会", "法治",  "文娱", "科技", "生活", "人物"]
         # menu_list = sel.xpath('//div[@class="nav"]/div[@class="wrap"]/a')
         menu_list = sel.xpath('//div[@class="nav_list"]/div[@class="left"]/div/span/a')
