@@ -75,14 +75,14 @@ class FujianInfoSpider(scrapy.Spider):
         self.browser.execute_script("arguments[0].click();", info_page)
         time.sleep(1)
         page_list = self.browser.find_elements_by_xpath('//ul[@class="el-pager"]/li')
-
-        for i in range(int(page_list[-1].text)):
+        #  int(page_list[-1].text)-1
+        for i in range(1):
             news_element_list = self.browser.find_elements_by_xpath('//table/tbody/tr/td/a')
             news_list = [news.get_attribute("href") for news in news_element_list]
             yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
                                  dont_filter=True)
             time.sleep(1)
-            next_page = self.browser.find_element_by_xpath('//div[@class="btn-next"]/i')
+            next_page = self.browser.find_element_by_xpath('//*[@class="btn-next"]/i')
             self.browser.execute_script("arguments[0].click();", next_page)
             time.sleep(1)
 
@@ -101,7 +101,7 @@ class FujianInfoSpider(scrapy.Spider):
         # '/html/body/div[2]/div[3]/div/div[1]'
         browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
         browser.get(response.url)
-
+        time.sleep(1)
         publish_time_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
         publish_time = [time.text for time in publish_time_element]
         title_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')
@@ -109,11 +109,13 @@ class FujianInfoSpider(scrapy.Spider):
         contents_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_content"]/p')
         contents = [c.text for c in contents_element]
         labels = []
+        browser.close()
         news_item["spider_time"] = spider_time
         news_item["publish_time"] = process_time(publish_time)
         news_item["title"] = process_title(title)
         news_item["label"] = process_label(labels)
         news_item["content"] = process_content(contents)
         news_item['url'] = sel.response.url.strip()
+
 
         return news_item
