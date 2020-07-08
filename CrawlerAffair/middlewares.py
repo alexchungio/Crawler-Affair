@@ -172,15 +172,16 @@ class XinhuaMiddleware(object):
 
 
                 if len(more_btn) or len(more_link) != 0:
-                    while True:
+                   while self.max_page > 0:
                         try:
-                            if self.max_page > 0:
-                                click_element.click()
-                                time.sleep(self.delay_time)
-                                self.max_page -= 1
-                            else:
-                                break
+
+                            scroll(driver=spider.browser, sleep_time=0.2)
+                            click_element.click()
+                            time.sleep(self.delay_time)
+                            self.max_page -= 1
                         except ElementNotInteractableException:
+                            break
+                        except StaleElementReferenceException:
                             break
                 # return selenium response
                 html = spider.browser.page_source
@@ -265,7 +266,6 @@ class CCTVMiddleware(object):
         #                    'http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']:
         from selenium.webdriver.common.action_chains import ActionChains
         if spider.name in [CCTVNewsSpider.name, CCTVCaijingSpider.name]:
-
             if request.url in spider.urls:
                 spider.browser.get(url=request.url)
                 time.sleep(1)
@@ -277,7 +277,6 @@ class CCTVMiddleware(object):
                 elif spider.name == CCTVCaijingSpider.name:
                     more_btn = spider.browser.find_elements_by_xpath('//div[@id="open_box"]')
                     # click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
-
                 if len(more_btn)!= 0:
                     while self.max_page > 0:
                         try:
