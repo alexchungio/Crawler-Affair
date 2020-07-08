@@ -38,7 +38,7 @@ from CrawlerAffair.utils import scroll
 
 # 无头浏览器设置
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 # chrome_options.add_argument("window-size=1024,768")
@@ -53,6 +53,7 @@ class FujianInfoSpider(scrapy.Spider):
     custom_menu = []
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -63,6 +64,7 @@ class FujianInfoSpider(scrapy.Spider):
     # 整个爬虫结束后关闭浏览器
     def close(self, spider):
         self.browser.quit()
+        self.sub_browser.quit()
 
     # parse web html
     def parse(self, response):
@@ -75,8 +77,8 @@ class FujianInfoSpider(scrapy.Spider):
         self.browser.execute_script("arguments[0].click();", info_page)
         time.sleep(1)
         page_list = self.browser.find_elements_by_xpath('//ul[@class="el-pager"]/li')
-        #  int(page_list[-1].text)-1
-        for i in range(1):
+        #
+        for i in range(int(page_list[-1].text)):
             news_element_list = self.browser.find_elements_by_xpath('//table/tbody/tr/td/a')
             news_list = [news.get_attribute("href") for news in news_element_list]
             yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
@@ -99,23 +101,19 @@ class FujianInfoSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
-        browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-        browser.get(response.url)
-        time.sleep(1)
-        publish_time_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
+        self.sub_browser.get(response.url)
+        publish_time_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
         publish_time = [time.text for time in publish_time_element]
-        title_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')
+        title_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')
         title = [t.text for t in title_element]
-        contents_element = browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_content"]/p')
+        contents_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_content"]/p')
         contents = [c.text for c in contents_element]
         labels = []
-        browser.close()
         news_item["spider_time"] = spider_time
         news_item["publish_time"] = process_time(publish_time)
         news_item["title"] = process_title(title)
         news_item["label"] = process_label(labels)
         news_item["content"] = process_content(contents)
         news_item['url'] = sel.response.url.strip()
-
 
         return news_item
