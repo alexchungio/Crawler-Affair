@@ -126,7 +126,10 @@ class CCTVShipingSpider(scrapy.Spider):
         self.browser.get(response.url)
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for i in range(30):
-            yield scrapy.Request(url=sel.response.url, meta=None, callback=self.parse_sub_page, dont_filter=True)
+            news_element_list = self.browser.find_elements_by_xpath('//div[@class="img_title_list"]/div/h2/a')
+            news_list = [news.get_attribute("href") for news in news_element_list]
+            yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
+                                 dont_filter=True)
             scroll(self.browser)
             next_page = self.browser.find_element_by_xpath('//span[@class="tpb_right"]/a[contains(text(), ">")]')
             self.browser.execute_script("arguments[0].click();", next_page)
@@ -135,7 +138,7 @@ class CCTVShipingSpider(scrapy.Spider):
     def parse_sub_page(self, response):
 
         sel = Selector(response)
-        news_list = sel.xpath('//div[@class="img_title_list"]/div/h2/a/@href').extract()
+        news_list = response.meta["news_list"]
         for news_url in news_list:
             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
 
