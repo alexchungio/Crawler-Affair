@@ -113,3 +113,5 @@ def scroll(driver, sleep_time=0.1):
     time.sleep(sleep_time)
     driver.execute_script("window.scrollTo(0, {0});".format(last_height))
     time.sleep(sleep_time)
+
+    return last_height
