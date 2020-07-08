@@ -30,15 +30,16 @@ chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
+# chrome_options.add_argument("window-size=1024,768")
 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
-
 
 
 class ThepapaperCommonSpider(scrapy.Spider):
     name = "thepaper_select_spider"
     urls = ["https://www.thepaper.cn/"]
     allowed_domains = ["thepaper.cn"]
+    max_page = 200
     custom_menu = []
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
@@ -63,9 +64,11 @@ class ThepapaperCommonSpider(scrapy.Spider):
             '//div[@id="newsslidebd"]/span[contains(@id, "news_list")]')
         self.browser.execute_script("arguments[0].click();", news_list_button)
         # scroll to get all page
-        while True:
+
+        while self.max_page > 0:
             try:
-                scroll(self.browser, sleep_time=0.2)
+                last_height = scroll(self.browser, sleep_time=0.2)
+                print(last_height)
                 add_buttons = self.browser.find_elements_by_xpath(
                     '//div[@id="addButton"]/a[contains(text(), "点击加载更多")]')
                 end_flag = self.browser.find_elements_by_xpath(
@@ -74,6 +77,7 @@ class ThepapaperCommonSpider(scrapy.Spider):
                     break
                 elif len(add_buttons) > 0:
                     self.browser.execute_script("arguments[0].click();", add_buttons[0])
+                self.max_page -= 1
             except ElementNotInteractableException:
                 break
             except StaleElementReferenceException:
@@ -121,3 +125,4 @@ class ThepaperShishiSpider(ThepapaperCommonSpider):
     name = "thepaper_shishi_spider"
     urls = ["https://www.thepaper.cn/channel_25950"]
     allowed_domains = ["thepaper.cn"]
+    max_page = 100
