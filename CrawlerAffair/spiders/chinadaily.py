@@ -32,17 +32,18 @@ chrome_options.add_argument('--no-sandbox')
 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
 
-class ChinadailyChinaSpider(scrapy.Spider):
-    "央视网观点"
+
+class ChinadailyCommonSpider(scrapy.Spider):
     name = "chinadaily_china_spider"
-    urls = []
+    urls = ["https://china.chinadaily.com.cn"]
     allowed_domains = ["chinadaily.com.cn"]
+    custom_menu = []
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
-        urls = ["https://china.chinadaily.com.cn"]
+        urls = self.urls
         for url in urls:
             yield scrapy.Request(url=url, meta=None, callback=self.parse)
 
@@ -54,15 +55,13 @@ class ChinadailyChinaSpider(scrapy.Spider):
     def parse(self, response):
         sel = Selector(response)
 
-        self.browser.get(response.url)
-        custom_menu = ["要闻", "独家"]
-        menu_list = sel.xpath('//div[@class="jr-link2"]/ul/a')
+        menu_list = sel.xpath('//div[@class="jr-link2"]/ul/li/a')
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for menu_url in menu_list:
-            if menu_url.xpath('./text()').extract_first() not in custom_menu:
+            if menu_url.xpath('./text()').extract_first() not in self.custom_menu:
                 continue
             else:
-                url = menu_url.xpath('./@href').extract_first()
+                url = 'https:' + menu_url.xpath('./@href').extract_first()
                 yield scrapy.Request(url=url, meta=None, callback=self.parse_menu_page)
 
     def parse_menu_page(self, response):
@@ -71,7 +70,11 @@ class ChinadailyChinaSpider(scrapy.Spider):
         self.browser.get(response.url)
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for i in range(40):
-            yield scrapy.Request(url=sel.response.url, meta=None, callback=self.parse_sub_page, dont_filter=True)
+            news_element_list = self.browser.find_elements_by_xpath(
+                '//div[@class="left-liebiao"]/div[@class="busBox3"]/div/div/h3/a')
+            news_list = [news.get_attribute("href") for news in news_element_list]
+            yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
+                                 dont_filter=True)
             scroll(self.browser)
             next_page = self.browser.find_element_by_xpath('//div[@id="div_currpage"]/a[contains(text(), "下一页")]')
             self.browser.execute_script("arguments[0].click();", next_page)
@@ -79,11 +82,9 @@ class ChinadailyChinaSpider(scrapy.Spider):
 
     def parse_sub_page(self, response):
 
-        sel = Selector(response)
-        news_list = sel.xpath('//div[@class="img_title_list"]/div/h2/a/@href').extract()
+        news_list = response.meta["news_list"]
         for news_url in news_list:
             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
-
             yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
 
     def parse_detail(self, response):
@@ -93,9 +94,9 @@ class ChinadailyChinaSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
-        publish_time = sel.xpath('//div[@class="function"]/span[@class="info"]/i/text()').extract()
-        title = sel.xpath('//div[@class="cnt_bd"]/h1/text()').extract()
-        contents = sel.xpath('//div[@class="cnt_bd"]/p/text()').extract()
+        publish_time = sel.xpath('//div[@class="fenx"]/div[@class="xinf-le"]/text()').extract()
+        title = sel.xpath('//div[@class="container-left2"]/h1/text()').extract()
+        contents = sel.xpath('//div[@id="Content"]/p/text()').extract()
         labels = []
 
         news_item["spider_time"] = spider_time
@@ -106,3 +107,15 @@ class ChinadailyChinaSpider(scrapy.Spider):
         news_item['url'] = sel.response.url.strip()
 
         return news_item
+
+
+class ChinadailyWorldSpider(ChinadailyCommonSpider):
+    name = "chinadaily_world_spider"
+    urls = ["https://china.chinadaily.com.cn"]
+    custom_menu = ["独家", "要闻", "滚动"]
+
+
+class ChinadailyChinaSpider(ChinadailyCommonSpider):
+    name = "chinadaily_china_spider"
+    urls = ["https://china.chinadaily.com.cn"]
+    custom_menu = ["要闻", "独家"]
