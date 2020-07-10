@@ -68,6 +68,7 @@ class ChinadailyCommonSpider(scrapy.Spider):
 
         sel = Selector(response)
         self.browser.get(response.url)
+        time.sleep(1)
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for i in range(40):
             news_element_list = self.browser.find_elements_by_xpath(
