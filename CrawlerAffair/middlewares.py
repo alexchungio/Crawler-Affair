@@ -147,6 +147,7 @@ class XinhuaMiddleware(object):
 
             if request.url in spider.urls:
                 spider.browser.get(url=request.url)
+                time.sleep(1)
                 # switch menu
                 if spider.name in [XinhuaInfoSpider.name] and spider.index:
                     menu_switch = spider.browser.find_element_by_xpath(
@@ -177,7 +178,7 @@ class XinhuaMiddleware(object):
 
                             scroll(driver=spider.browser, sleep_time=0.2)
                             click_element.click()
-                            time.sleep(self.delay_time)
+                            time.sleep(1)
                             self.max_page -= 1
                         except ElementNotInteractableException:
                             break
@@ -297,7 +298,7 @@ class CCTVMiddleware(object):
                                 if click_element.text == "没有更多数据":
                                     break
                             ActionChains(spider.browser).click(click_element).perform()
-                            time.sleep(self.delay_time)
+                            time.sleep(1)
                             self.max_page -= 1
                         except ElementNotInteractableException:
                             break
