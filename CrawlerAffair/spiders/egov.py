@@ -1,0 +1,201 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#------------------------------------------------------
+# @ File       : egov.py
+# @ Description:  
+# @ Author     : Alex Chung
+# @ Contact    : yonganzhong@outlook.com
+# @ License    : Copyright (c) 2017-2018
+# @ Time       : 2020/7/8 下午7:07
+# @ Software   : PyCharm
+#-------------------------------------------------------
+import os
+import re
+import time
+import scrapy
+from scrapy.selector import Selector
+from selenium import webdriver
+from  selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+
+from CrawlerAffair.utils import process_title, process_time, process_content, process_label
+from CrawlerAffair.items import CrawlerAffairItem
+from CrawlerAffair.utils import scroll
+
+
+# 无头浏览器设置
+chrome_options = Options()
+# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument('--no-sandbox')
+
+driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
+
+
+
+# class EgovNewsSpider(scrapy.Spider):
+#     name = "egov_news_spider"
+#     urls = ["http://www.e-gov.org.cn/channel-1.html"]
+#     allowed_domains = ["e-gov.org.cn"]
+#     custom_menu = []
+#
+#     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+#     sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+#     def start_requests(self):
+#         # 'http://www.news.cn/local/wgzg.htm'
+#         urls = self.urls
+#         for url in urls:
+#             yield scrapy.Request(url=url, meta=None, callback=self.parse)
+#
+#     # 整个爬虫结束后关闭浏览器
+#     def close(self, spider):
+#         self.browser.quit()
+#         self.sub_browser.quit()
+#     # parse web html
+#     def parse(self, response):
+#
+#         self.browser.get(response.url)
+#         time.sleep(1)
+#         menu_button_list = self.browser.find_elements_by_xpath('//div[@id="search_list"]/table/tbody/tr/td/div/div/table/tbody/tr/td/div/a[contains(text(), "更多")]')
+#         # menu_button_list = sel.xpath('//*[@id="search_list"]/table/tbody/tr[1]/td[1]/div/div[2]/table/tbody/tr[11]/td/div/a').extract()
+#         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
+#         # menu_url_list = [menu_button.get_attribute("href") for menu_button in menu_button_list]
+#         for menu_button in menu_button_list:
+#             pre_all_window =  self.browser.window_handles
+#             self.browser.execute_script("arguments[0].click();", menu_button)
+#             time.sleep(1)
+#             # 针对弹出页面后无法获取当前页面进行处理（非原页面刷新）
+#             current_all_window = self.browser.window_handles
+#             for window in current_all_window:
+#                 if window not in pre_all_window:
+#                     self.browser.switch_to.window(window)
+#                     '//*[@id="pageLabel"]/label'
+#             page_label = self.browser.find_element_by_xpath('//*[@id="pageLabel"]/label').text
+#             num_page = int(page_label.split(r'/')[-1])
+#             print(self.browser.current_url)
+#             # get page news list
+#             for index in range(1, num_page+1):
+#                 'http://www.e-gov.org.cn/cat-1.html'
+#                 url = self.browser.current_url.replace('.html', f'-{index}.html')
+#                 yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page,  dont_filter=True)
+#
+#
+#     def parse_sub_page(self, response):
+#
+#         self.browser.get(response.url)
+#         time.sleep(1)
+#         news_element_list = self.browser.find_elements_by_xpath('//*[@id="search_list"]/table/tbody/tr/td/a')
+#         news_list = [news.get_attribute("href") for news in news_element_list]
+#         for news_url in news_list:
+#             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+#             yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+#
+#     def parse_detail(self, response):
+#
+#
+#         news_item = CrawlerAffairItem()
+#         spider_time = str(int(time.time()))
+#
+#         self.sub_browser.get(response.url)
+#         time.sleep(1)
+#
+#         publish_time = self.sub_browser.find_element_by_xpath('//div[@id="text_block"]/div[@id="content_detail"]').text
+#         title = self.sub_browser.find_element_by_xpath('//div[@id="text_block"]/div[@class="title_bar"]').text
+#         contents_element = self.sub_browser.find_elements_by_xpath('//*[@id="content_detail"]/p')
+#         contents = [content.text for content in contents_element]
+#         labels = []
+#         news_item["spider_time"] = spider_time
+#         news_item["publish_time"] = process_time(publish_time)
+#         news_item["title"] = process_title(title)
+#         news_item["label"] = process_label(labels)
+#         news_item["content"] = process_content(contents)
+#         news_item['url'] = response.url.strip()
+#
+#         return news_item
+
+
+class EgovNewsSpider(scrapy.Spider):
+    name = "egov_news_spider"
+    urls = ["http://www.e-gov.org.cn/channel-1.html"]
+    allowed_domains = ["e-gov.org.cn"]
+    custom_menu = []
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    def start_requests(self):
+        # 'http://www.news.cn/local/wgzg.htm'
+        urls = self.urls
+        for url in urls:
+            yield scrapy.Request(url=url, meta=None, callback=self.parse)
+
+    # 整个爬虫结束后关闭浏览器
+    def close(self, spider):
+        self.browser.quit()
+        self.sub_browser.quit()
+    # parse web html
+    def parse(self, response):
+
+        self.browser.get(response.url)
+        time.sleep(1)
+        menu_button_list = self.browser.find_elements_by_xpath('//div[@id="search_list"]/table/tbody/tr/td/div/div/table/tbody/tr/td/div/a[contains(text(), "更多")]')
+        # menu_button_list = sel.xpath('//*[@id="search_list"]/table/tbody/tr[1]/td[1]/div/div[2]/table/tbody/tr[11]/td/div/a').extract()
+        # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
+        # menu_url_list = [menu_button.get_attribute("href") for menu_button in menu_button_list]
+        main_window = self.browser.current_window_handle
+        for menu_button in menu_button_list:
+
+            pre_all_window = self.browser.window_handles
+            self.browser.execute_script("arguments[0].click();", menu_button)
+            time.sleep(1)
+            # 针对弹出页面后无法获取当前页面进行处理（非原页面刷新）
+            current_all_window = self.browser.window_handles
+            for window in current_all_window:
+                if window not in pre_all_window:
+                    self.browser.switch_to.window(window)
+            page_label = self.browser.find_element_by_xpath('//*[@id="pageLabel"]/label').text
+
+
+            num_page = int(page_label.split(r'/')[-1])
+            # get page news list
+            for index in range(1, num_page+1):
+
+                url = self.browser.current_url.replace('.html', f'-{index}.html')
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_sub_page,  dont_filter=True)
+
+            # back to main window
+            self.browser.switch_to_window(main_window)
+
+
+    def parse_sub_page(self, response):
+
+        self.browser.get(response.url)
+        time.sleep(1)
+        news_element_list = self.browser.find_elements_by_xpath('//*[@id="search_list"]/table/tbody/tr/td/a')
+        news_list = [news.get_attribute("href") for news in news_element_list]
+        for news_url in news_list:
+            # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
+            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+
+    def parse_detail(self, response):
+
+
+        news_item = CrawlerAffairItem()
+        spider_time = str(int(time.time()))
+
+        self.sub_browser.get(response.url)
+        time.sleep(1)
+
+        publish_time = self.sub_browser.find_element_by_xpath('//div[@id="text_block"]/div[@id="content_detail"]').text
+        title_elements = self.sub_browser.find_elements_by_xpath('//div[@id="text_block"]/div[@class="title_bar"]')
+        title = [t.text for t in title_elements]
+        contents_element = self.sub_browser.find_elements_by_xpath('//*[@id="content_detail"]/p')
+        contents = [content.text for content in contents_element]
+        labels = []
+        news_item["spider_time"] = spider_time
+        news_item["publish_time"] = process_time(publish_time)
+        news_item["title"] = process_title(title)
+        news_item["label"] = process_label(labels)
+        news_item["content"] = process_content(contents)
+        news_item['url'] = response.url.strip()
+
+        return news_item
