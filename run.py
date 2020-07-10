@@ -22,6 +22,7 @@ from scrapy.utils.log import configure_logging
 
 from CrawlerAffair.spiders.china import ChinaAffairSpider, ChinaNewsSpider
 from CrawlerAffair.spiders.fujian import FujianInfoSpider
+from CrawlerAffair.spiders.egov import EgovCompanySpider,EgovComputerSpider,EgovElectronicSpider,EgovInfoSpider,EgovExhibitionSpider,EgovPurchaseSpider,EgovNewsSpider
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -63,6 +64,14 @@ if __name__ == "__main__":
     # process.crawl("thepaper_shishi_spider", domain={"thepaper.cn"})
 
 
-    process.crawl(FujianInfoSpider, domain={"fujian.gov.cn"})
+    # process.crawl(FujianInfoSpider, domain={"fujian.gov.cn"})
+
+    process.crawl(EgovNewsSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovPurchaseSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovExhibitionSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovInfoSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovElectronicSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovComputerSpider, domain={"e-gov.org.cn"})
+    process.crawl(EgovCompanySpider, domain={"e-gov.org.cn"})
     process.start()
 
