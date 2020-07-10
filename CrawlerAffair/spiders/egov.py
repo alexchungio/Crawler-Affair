@@ -86,9 +86,9 @@ class EgovCommonSpider(scrapy.Spider):
 
     def parse_sub_page(self, response):
 
-        self.browser.get(response.url)
+        self.sub_browser.get(response.url)
         time.sleep(1)
-        news_element_list = self.browser.find_elements_by_xpath('//*[@id="search_list"]/table/tbody/tr/td/a')
+        news_element_list = self.sub_browser.find_elements_by_xpath('//*[@id="search_list"]/table/tbody/tr/td/a')
         news_list = [news.get_attribute("href") for news in news_element_list]
         for news_url in news_list:
             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
