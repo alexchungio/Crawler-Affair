@@ -73,3 +73,62 @@ class ItemToCSVPipeline(object):
                      item['url']]
         self.write.writerow(item_list)
         return item
+
+
+class ItemAffairCSVPipeline(object):
+    def __init__(self, file_path):
+        self.path = file_path
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        file_path = crawler.settings.get('PATH')
+        return cls(file_path=file_path)
+
+    def open_spider(self, spider):
+        self.spider_dir = os.path.join(self.path, spider.name)
+        if os.path.exists(self.spider_dir) is False:
+            os.makedirs(self.spider_dir)
+        tmp_path = os.path.join(self.spider_dir, str(int(time.time())) + '.csv')
+        self.fhd = open(tmp_path, 'w')
+        self.write = csv.writer(self.fhd)
+        self.write.writerow(['title', 'label', 'spider_time', 'publish_time', 'url'])
+
+    def close_spider(self, spider):
+        self.fhd.close()
+
+    def process_item(self, item, spider):
+
+        csv_item_list = [item['title'], item['spider_time'], item['publish_time'], item['label'], item['url']]
+        self.write.writerow(csv_item_list)
+
+        # write content
+        with open(os.path.join(self.spider_dir, f'{item["title"]}.txt'), 'w') as fw:
+            fw.write(item['content'])
+
+        return item
+
+
+class ItemAffairTxtPipeline(object):
+    def __init__(self, file_path):
+        self.path = file_path
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        file_path = crawler.settings.get('PATH')
+        return cls(file_path=file_path)
+
+    def open_spider(self, spider):
+        self.spider_dir = os.path.join(self.path, spider.name)
+        if os.path.exists(self.spider_dir) is False:
+            os.makedirs(self.spider_dir)
+
+    def close_spider(self, spider):
+        pass
+
+    def process_item(self, item, spider):
+
+        # write content
+        with open(os.path.join(self.spider_dir, f'{item["title"]}.txt'), 'w') as fw:
+            fw.write(item['content'])
+
+        return item

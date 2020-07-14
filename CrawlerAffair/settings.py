@@ -58,7 +58,7 @@ CONCURRENT_REQUESTS = 16
 #}
 
 
-
+HTTPERROR_ALLOWED_CODES=[400]
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
@@ -81,8 +81,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'CrawlerAffair.pipelines.ItemToTextPipeline': 300,
-   'CrawlerAffair.pipelines.ItemToCSVPipeline': 310,
+   # 'CrawlerAffair.pipelines.ItemToTextPipeline': 300,
+   # 'CrawlerAffair.pipelines.ItemToCSVPipeline': 310,
+   'CrawlerAffair.pipelines.ItemAffairCSVPipeline': 300,
+   'CrawlerAffair.pipelines.ItemAffairTxtPipeline': 310,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
