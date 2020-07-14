@@ -36,8 +36,8 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 
 
 class ThepapaperCommonSpider(scrapy.Spider):
-    name = "thepaper_select_spider"
-    urls = ["https://www.thepaper.cn/"]
+    name = ""
+    urls = []
     allowed_domains = ["thepaper.cn"]
     max_page = 200
     custom_menu = []

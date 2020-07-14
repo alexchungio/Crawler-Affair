@@ -125,8 +125,8 @@ class GovOnePageSpider(scrapy.Spider):
 
 
 class GovMultiPageSpider(scrapy.Spider):
-    name = "gov_lianbo_spider"
-    urls = ["http://www.gov.cn/xinwen/lianbo/index.htm"]
+    name = ""
+    urls = []
     allowed_domains = ["gov.cn"]
     custom_menu = []
 

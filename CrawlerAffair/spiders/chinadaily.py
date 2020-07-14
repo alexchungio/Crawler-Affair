@@ -34,8 +34,8 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 
 
 class ChinadailyCommonSpider(scrapy.Spider):
-    name = "chinadaily_china_spider"
-    urls = ["https://china.chinadaily.com.cn"]
+    name = ""
+    urls = []
     allowed_domains = ["chinadaily.com.cn"]
     custom_menu = []
 
@@ -45,6 +45,7 @@ class ChinadailyCommonSpider(scrapy.Spider):
         # 'http://www.news.cn/local/wgzg.htm'
         urls = self.urls
         for url in urls:
+
             yield scrapy.Request(url=url, meta=None, callback=self.parse)
 
     # 整个爬虫结束后关闭浏览器

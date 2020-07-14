@@ -33,7 +33,7 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 
 
 class EgovCommonSpider(scrapy.Spider):
-    name = "egov_news_spider"
+    name = ""
     urls = ["http://www.e-gov.org.cn/channel-1.html"]
     allowed_domains = ["e-gov.org.cn"]
     custom_menu = []
@@ -147,7 +147,7 @@ class EgovElectronicSpider(EgovCommonSpider):
 
 
 class EgovInfoSpider(EgovCommonSpider):
-    name = "egov_electronic_spider"
+    name = "egov_info_spider"
     urls = ["http://www.e-gov.org.cn/channel-1002.html"]
 
 
