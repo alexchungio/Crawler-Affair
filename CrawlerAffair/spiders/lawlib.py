@@ -26,16 +26,16 @@ from CrawlerAffair.utils import convert_stamp_time
 
 # 无头浏览器设置
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
 
 
-class LawlibXinshiSpider(scrapy.Spider):
-    name = "lawlib_xinshi_spider"
-    urls = ["http://www.law-lib.com/cpws/cpwsml-cx.asp"]
+class LawlibCommonSpider(scrapy.Spider):
+    name = ""
+    urls = []
     allowed_domains = ["law-lib.com"]
     custom_menu = []
 
@@ -71,7 +71,6 @@ class LawlibXinshiSpider(scrapy.Spider):
                 self.browser.execute_script("arguments[0].click();", more_button)
                 time.sleep(1)
 
-
     def parse_detail(self, response):
 
         news_item = CrawlerAffairItem()
@@ -95,3 +94,18 @@ class LawlibXinshiSpider(scrapy.Spider):
         news_item['url'] = response.url.strip()
 
         return news_item
+
+
+class LawlibXinshiSpider(LawlibCommonSpider):
+    name = "lawlib_xinshi_spider"
+    urls = ["http://www.law-lib.com/cpws/cpwsml-cx.asp"]
+
+
+class LawlibMinshiSpider(LawlibCommonSpider):
+    name = "lawlib_minshi_spider"
+    urls = ["http://www.law-lib.com/cpws/cpwsml-cm.asp"]
+
+
+class LawlibXinzhenSpider(LawlibCommonSpider):
+    name = "lawlib_xinzhen_spider"
+    urls = ["http://www.law-lib.com/cpws/cpwsml-cz.asp"]
