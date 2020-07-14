@@ -55,7 +55,7 @@ def process_content(contents):
     return content
 
 
-def process_time(local_time):
+def process_time(local_time, is_stamp=True):
     """
 
     :param local_time:
@@ -80,12 +80,29 @@ def process_time(local_time):
         else:
             local_time = f"{time_date[0]} 00:00:00"
 
-    struct_time = time.strptime(local_time, "%Y-%m-%d %H:%M:%S")
-    stamp = str(int(time.mktime(struct_time)))
+    if is_stamp:
+        struct_time = time.strptime(local_time, "%Y-%m-%d %H:%M:%S")
+        stamp = str(int(time.mktime(struct_time)))
+        return stamp
+    else:
+        return local_time
 
-    return stamp
 
-def scroll(driver, sleep_time=0.1):
+def convert_stamp_time(time_stamp, is_date=False):
+    """
+    convert stamp to time
+    :param time_stamp:
+    :param is_date:
+    :return:
+    """
+    local_time = time.localtime(int(time_stamp))
+    format_time = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+    if is_date:
+        format_time = format_time.split(' ')[0]
+    return format_time
+
+
+def scroll(driver, height_ratio=None, sleep_time=0.1):
     # function to handle dynamic page content loading - using Selenium
     # define initial page height for 'while' loop
     last_height = driver.execute_script("return document.body.scrollHeight")
@@ -97,6 +114,9 @@ def scroll(driver, sleep_time=0.1):
             break
         else:
             last_height = new_height
+    
+    if height_ratio is not None:
+        last_height = int(last_height * height_ratio)
 
     driver.execute_script("window.scrollTo(0, 0);")
     time.sleep(sleep_time)
