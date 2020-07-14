@@ -98,7 +98,7 @@ class ItemAffairCSVPipeline(object):
 
     def process_item(self, item, spider):
 
-        csv_item_list = [item['title'], item['spider_time'], item['publish_time'], item['label'], item['url']]
+        csv_item_list = [item['title'], item['label'], item['spider_time'], item['publish_time'],  item['url']]
         self.write.writerow(csv_item_list)
 
         # write content
