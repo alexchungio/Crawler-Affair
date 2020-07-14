@@ -18,6 +18,7 @@ from scrapy.selector import Selector
 from selenium import webdriver
 from  selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import StaleElementReferenceException
 
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
@@ -80,9 +81,12 @@ class QQNewsSpider(scrapy.Spider):
         sub_news_element_list = self.sub_browser.find_elements_by_xpath('//div[@class="item-box"]/ul/div/li/div[@class="mod-txt"]/h3/a')
         print(sub_news_element_list)
         for news_element in sub_news_element_list:
-            url = news_element.get_attribute("href")
-            # check is special module
-            yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
+            try:
+                url = news_element.get_attribute("href")
+                # check is special module
+                yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
+            except StaleElementReferenceException:
+                continue
 
     def parse_detail(self, response):
 
