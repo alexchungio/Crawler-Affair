@@ -94,7 +94,7 @@ class QQNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(2)
+        time.sleep(1)
 
         publish_time_element = self.detail_browser.find_element_by_xpath('/html/head/meta[contains(@name, "apub:time")]')
         publish_time = publish_time_element.get_attribute("content")
