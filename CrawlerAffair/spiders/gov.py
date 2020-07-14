@@ -128,7 +128,7 @@ class GovMultiPageSpider(scrapy.Spider):
     name = "gov_lianbo_spider"
     urls = ["http://www.gov.cn/xinwen/lianbo/index.htm"]
     allowed_domains = ["gov.cn"]
-    custom_menu = ["地方"]
+    custom_menu = []
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
     sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
@@ -171,7 +171,6 @@ class GovMultiPageSpider(scrapy.Spider):
             yield scrapy.Request(url=self.browser.current_url, meta=None, callback=self.parse_sub_menu, dont_filter=True)
 
             self.browser.switch_to_window(main_window)
-
 
     def parse_sub_menu(self, response):
 
@@ -237,32 +236,30 @@ class GovMultiPageSpider(scrapy.Spider):
         return news_item
 
 
-# class GovYaowenSpider(GovOnePageSpider):
-#     name = "gov_yaowen_spider"
-#     urls = ["http://www.gov.cn/xinwen/yaowen.htm"]
-#
-#
-# class GovPolicySpider(GovOnePageSpider):
-#     name = "gov_policy_spider"
-#     urls = ["http://www.gov.cn/zhengce/zuixin.htm"]
-#
-#
-# class GovMultiPageSpider(GovOnePageSpider):
-#     name = "gov_lianbo_spider"
-#     urls = ["http://www.gov.cn/xinwen/lianbo/index.htm"]
-#     allowed_domains = ["gov.cn"]
+class GovYaowenSpider(GovOnePageSpider):
+    name = "gov_yaowen_spider"
+    urls = ["http://www.gov.cn/xinwen/yaowen.htm"]
 
-# class GovBumenSpider(scrapy.Spider):
-#     name = "gov_bumen_spider"
-#     urls = ["http://www.gov.cn/xinwen/lianbo/bumen.htm"]
-#     allowed_domains = ["gov.cn"]
-#
-# class GovDifangSpider(scrapy.Spider):
-#     name = "gov_difang_spider"
-#     urls = ["http://www.gov.cn/xinwen/lianbo/difang.htm"]
-#     allowed_domains = ["gov.cn"]
-#
-# class GovDifangSpider(scrapy.Spider):
-#     name = "gov_difang_spider"
-#     urls = ["http://www.gov.cn/xinwen/lianbo/difang.htm"]
-#     allowed_domains = ["gov.cn"]
+
+class GovPolicySpider(GovOnePageSpider):
+    name = "gov_policy_spider"
+    urls = ["http://www.gov.cn/zhengce/zuixin.htm"]
+
+
+class GovLianboSpider(GovMultiPageSpider):
+    name = "gov_lianbo_spider"
+    urls = ["http://www.gov.cn/xinwen/lianbo/index.htm"]
+    allowed_domains = ["gov.cn"]
+    custom_menu = ["部门","地方"]
+
+class GovFabuSpider(GovMultiPageSpider):
+    name = "gov_fabu_spider"
+    urls = ["http://www.gov.cn/xinwen/fabu/index.htm"]
+    allowed_domains = ["gov.cn"]
+    custom_menu = ["部门","其他"]
+
+class GovRenmianSpider(scrapy.Spider):
+    name = "gov_renmian_spider"
+    urls = ["http://www.gov.cn/xinwen/renmian/index.htm"]
+    allowed_domains = ["gov.cn"]
+    custom_menu= ["中央", "地方", "驻外", "其他"]
