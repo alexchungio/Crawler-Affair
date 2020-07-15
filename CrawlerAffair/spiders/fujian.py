@@ -86,7 +86,7 @@ class FujianInfoSpider(scrapy.Spider):
             time.sleep(1)
             next_page = self.browser.find_element_by_xpath('//*[@class="btn-next"]/i')
             self.browser.execute_script("arguments[0].click();", next_page)
-            time.sleep(1)
+            time.sleep(2)
 
     def parse_sub_page(self, response):
 
@@ -102,6 +102,7 @@ class FujianInfoSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
         self.sub_browser.get(response.url)
+        time.sleep(1)
         publish_time_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
         publish_time = [time.text for time in publish_time_element]
         title_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')

@@ -63,15 +63,32 @@ if __name__ == "__main__":
     # process.crawl("thepaper_select_spider", domain={"thepaper.cn"})
     # process.crawl("thepaper_shishi_spider", domain={"thepaper.cn"})
 
-
     # process.crawl(FujianInfoSpider, domain={"fujian.gov.cn"})
 
-    process.crawl(EgovNewsSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovPurchaseSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovExhibitionSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovInfoSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovElectronicSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovComputerSpider, domain={"e-gov.org.cn"})
-    process.crawl(EgovCompanySpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovNewsSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovPurchaseSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovExhibitionSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovInfoSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovElectronicSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovComputerSpider, domain={"e-gov.org.cn"})
+    # process.crawl(EgovCompanySpider, domain={"e-gov.org.cn"})
+
+    # process.crawl("gov_yaowen_spider", domain={"gov.cn"})
+    # process.crawl("gov_policy_spider", domain={"gov.cn"})
+    # process.crawl("gov_lianbo_spider", domain={"gov.cn"})
+    # process.crawl("gov_fabu_spider", domain={"gov.cn"})
+    # process.crawl("gov_renmian_spider", domain={"gov.cn"})
+
+    # process.crawl("lawlib_xinshi_spider", domain={"law-lib.com"})
+    # process.crawl("lawlib_minshi_spider", domain={"law-lib.com"})
+    # process.crawl("lawlib_xinzhen_spider", domain={"law-lib.com"})
+
+    # process.crawl("qq_news_spider", domain={"qq.com"})
+
+    # process.crawl("sina_news_spider", domain={"sina.com.cn"})
+    # process.crawl("sina_sifa_news_spider", domain={"sina.com.cn"})
+    process.crawl("sina_sifa_publicity_spider", domain={"sina.com.cn"})
+
     process.start()
+
 

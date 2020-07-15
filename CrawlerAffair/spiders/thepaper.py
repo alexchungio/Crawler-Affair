@@ -59,15 +59,17 @@ class ThepapaperCommonSpider(scrapy.Spider):
         sel = Selector(response)
 
         self.browser.get(response.url)
+        time.sleep(2)
         # show as list
         news_list_button = self.browser.find_element_by_xpath(
             '//div[@id="newsslidebd"]/span[contains(@id, "news_list")]')
         self.browser.execute_script("arguments[0].click();", news_list_button)
+        time.sleep(1)
         # scroll to get all page
 
         while self.max_page > 0:
             try:
-                last_height = scroll(self.browser, sleep_time=0.2)
+                last_height = scroll(self.browser, sleep_time=0.5)
                 print(last_height)
                 add_buttons = self.browser.find_elements_by_xpath(
                     '//div[@id="addButton"]/a[contains(text(), "点击加载更多")]')
@@ -77,6 +79,7 @@ class ThepapaperCommonSpider(scrapy.Spider):
                     break
                 elif len(add_buttons) > 0:
                     self.browser.execute_script("arguments[0].click();", add_buttons[0])
+                    time.sleep(1)
                 self.max_page -= 1
             except ElementNotInteractableException:
                 break

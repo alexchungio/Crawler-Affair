@@ -61,6 +61,7 @@ class QQNewsSpider(scrapy.Spider):
     def parse(self, response):
 
         self.browser.get(response.url)
+        time.sleep(2)
         while self.max_page > 0:
             news_element_list = self.browser.find_elements_by_xpath('//ul[@class="list"]/li/div[@class="detail"]/h3/a')
             for news_element in news_element_list:
@@ -71,13 +72,13 @@ class QQNewsSpider(scrapy.Spider):
                 else:
                     yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
                 # tail page
-            scroll(self.browser)
+            scroll(self.browser, sleep_time=0.5)
             self.max_page -= 1
-            time.sleep(1)
+            time.sleep(2)
 
     def parse_special_page(self, response):
         self.sub_browser.get(response.url)
-        time.sleep(5)
+        time.sleep(2)
         sub_news_element_list = self.sub_browser.find_elements_by_xpath('//div[@class="item-box"]/ul/div/li/div[@class="mod-txt"]/h3/a')
         print(sub_news_element_list)
         for news_element in sub_news_element_list:

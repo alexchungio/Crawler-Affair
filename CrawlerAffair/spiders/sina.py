@@ -159,7 +159,6 @@ class SinaSifaCommonSpider(scrapy.Spider):
         self.detail_browser.get(response.url)
         time.sleep(2)
 
-
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
             '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
         publish_time = [content.text for content in publish_time_element_0]
