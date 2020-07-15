@@ -148,6 +148,7 @@ class GovMultiPageSpider(scrapy.Spider):
     def parse(self, response):
 
         self.browser.get(response.url)
+        time.sleep(2)
         all_menu_list = self.browser.find_elements_by_xpath('//div[@class="pannel-title tit_s01"]')
 
         for menu_element in all_menu_list:
@@ -167,10 +168,12 @@ class GovMultiPageSpider(scrapy.Spider):
             for window in current_all_window:
                 if window not in pre_all_window:
                     self.browser.switch_to.window(window)
+                    time.sleep(1)
 
             yield scrapy.Request(url=self.browser.current_url, meta=None, callback=self.parse_sub_menu, dont_filter=True)
 
             self.browser.switch_to_window(main_window)
+            time.sleep(1)
 
     def parse_sub_menu(self, response):
 
