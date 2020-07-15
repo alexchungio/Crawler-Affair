@@ -77,7 +77,7 @@ class SinaNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(2)
+        time.sleep(1)
 
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
             '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
@@ -173,7 +173,7 @@ class SinaSifaCommonSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(2)
+        time.sleep(1)
 
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
             '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
