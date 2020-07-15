@@ -102,7 +102,7 @@ def convert_stamp_time(time_stamp, is_date=False):
     return format_time
 
 
-def scroll(driver, height_ratio=None, sleep_time=0.1):
+def scroll(driver, height_ratio=None, sleep_time=0.5):
     # function to handle dynamic page content loading - using Selenium
     # define initial page height for 'while' loop
     last_height = driver.execute_script("return document.body.scrollHeight")
