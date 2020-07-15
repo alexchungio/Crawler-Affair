@@ -42,7 +42,7 @@ class CCTVNewsSpider(scrapy.Spider):
     urls = []
     allowed_domains = ["cctv.com"]
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    # browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -52,8 +52,8 @@ class CCTVNewsSpider(scrapy.Spider):
 
     # 整个爬虫结束后关闭浏览器
     def close(self, spider):
-        self.browser.quit()
-
+        # self.browser.quit()
+        pass
     # parse web html
     def parse(self, response):
         sel = Selector(response)
@@ -123,16 +123,17 @@ class CCTVShipingSpider(scrapy.Spider):
         sel = Selector(response)
         # '[contains(text(), ">")]'
         self.browser.get(response.url)
+        time.sleep(2)
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for i in range(30):
             news_element_list = self.browser.find_elements_by_xpath('//div[@class="img_title_list"]/div/h2/a')
             news_list = [news.get_attribute("href") for news in news_element_list]
             yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
                                  dont_filter=True)
-            scroll(self.browser)
+            scroll(self.browser, sleep_time=0.5)
             next_page = self.browser.find_element_by_xpath('//span[@class="tpb_right"]/a[contains(text(), ">")]')
             self.browser.execute_script("arguments[0].click();", next_page)
-            time.sleep(1)
+            time.sleep(2)
 
     def parse_sub_page(self, response):
 
@@ -175,17 +176,16 @@ class CCTVCaijingSpider(scrapy.Spider):
     urls = ["https://jingji.cctv.com/caijing/index.shtml"]
     allowed_domains = ["cctv.com"]
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    # browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
-
         for url in self.urls:
             yield scrapy.Request(url=url, meta=None, callback=self.parse)
 
     # 整个爬虫结束后关闭浏览器
     def close(self, spider):
-        self.browser.quit()
-
+        # self.browser.quit()
+        pass
     # parse web html
     def parse(self, response):
         # '[contains(text(), ">")]'
