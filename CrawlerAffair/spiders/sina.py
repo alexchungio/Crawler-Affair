@@ -79,14 +79,30 @@ class SinaNewsSpider(scrapy.Spider):
         self.detail_browser.get(response.url)
         time.sleep(2)
 
-        publish_time = self.detail_browser.find_element_by_xpath('//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]').text
-        title_elements = self.detail_browser.find_elements_by_xpath('//h1[@class="main-title"]')
-        title = [t.text for t in title_elements]
+        publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
+            '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
+        publish_time = [content.text for content in publish_time_element_0]
+        publish_time_element_1 = self.detail_browser.find_elements_by_xpath(
+            '//div[@class="page-info"]/span[@class="time-source"]')
+        publish_time_1 = [content.text for content in publish_time_element_1]
+        publish_time.extend(publish_time_1)
+        publish_time = ''.join(publish_time)
+
+        title_elements_0 = self.detail_browser.find_elements_by_xpath('//h1[@class="main-title"]')
+        title = [t.text for t in title_elements_0]
+        title_elements_1 = self.detail_browser.find_elements_by_xpath('//div[@class="page-header"]/h1')
+        title_1 = [t.text for t in title_elements_1]
+        title.extend(title_1)
+
         contents_element = self.detail_browser.find_elements_by_xpath('//div[@id="artibody"]/p')
         contents = [content.text for content in contents_element]
-        contents_element_1 = self.detail_browser.find_elements_by_xpath('//div[@ id = "article"]/p')
+        contents_element_1 = self.detail_browser.find_elements_by_xpath(
+            '//div[@id="artibody"]/div[@class="detail_txt"]')
         contents_1 = [content.text for content in contents_element_1]
         contents.extend(contents_1)
+        contents_element_2 = self.detail_browser.find_elements_by_xpath('//div[@id="article"]/p')
+        contents_2 = [content.text for content in contents_element_2]
+        contents.extend(contents_2)
         labels = []
 
         news_item["spider_time"] = spider_time
@@ -176,9 +192,12 @@ class SinaSifaCommonSpider(scrapy.Spider):
 
         contents_element = self.detail_browser.find_elements_by_xpath('//div[@id="artibody"]/p')
         contents = [content.text for content in contents_element]
-        contents_element_1 = self.detail_browser.find_elements_by_xpath('//div[@ id = "article"]/p')
+        contents_element_1 = self.detail_browser.find_elements_by_xpath('//div[@id="artibody"]/div[@class="detail_txt"]')
         contents_1 = [content.text for content in contents_element_1]
         contents.extend(contents_1)
+        contents_element_2 = self.detail_browser.find_elements_by_xpath('//div[@id="article"]/p')
+        contents_2 = [content.text for content in contents_element_2]
+        contents.extend(contents_2)
         labels = []
 
         news_item["spider_time"] = spider_time
