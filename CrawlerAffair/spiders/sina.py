@@ -65,7 +65,7 @@ class SinaNewsSpider(scrapy.Spider):
                 url = news_element.get_attribute("href")
                 # check is special module
                 yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
-            scroll(self.detail_browser)
+            scroll(self.detail_browser, sleep_time=0.5)
             next_button = self.browser.find_element_by_xpath('//div[@class="pagebox"]/span/a[contains(text(), "下一页")]')
             self.browser.execute_script("arguments[0].click();", next_button)
             time.sleep(2)
@@ -77,7 +77,7 @@ class SinaNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(1)
+        time.sleep(2)
 
         publish_time = self.detail_browser.find_element_by_xpath('//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]').text
         title_elements = self.detail_browser.find_elements_by_xpath('//h1[@class="main-title"]')
@@ -136,7 +136,7 @@ class SinaSifaCommonSpider(scrapy.Spider):
                     while self.max_page > 0:
                         feed_card = self.browser.find_element_by_xpath('//div[@class="feed-card-page"]')
                         while feed_card.get_attribute("style") == "display: none;":
-                            scroll(self.browser)
+                            scroll(self.browser, sleep_time=0.5)
 
                         news_element_list = self.browser.find_elements_by_xpath('//div[@class="feed-card-item"]/h2/a')
                         for news_element in news_element_list:
@@ -157,7 +157,7 @@ class SinaSifaCommonSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(1)
+        time.sleep(2)
 
 
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
