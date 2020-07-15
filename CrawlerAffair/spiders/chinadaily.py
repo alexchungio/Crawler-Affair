@@ -69,7 +69,7 @@ class ChinadailyCommonSpider(scrapy.Spider):
 
         sel = Selector(response)
         self.browser.get(response.url)
-        time.sleep(1)
+        time.sleep(2)
         # 'data-spm-anchor-id="C87458.PehgQlaw4J7u.EbPec9NH7wI8.1225"'
         for i in range(40):
             news_element_list = self.browser.find_elements_by_xpath(
@@ -77,7 +77,7 @@ class ChinadailyCommonSpider(scrapy.Spider):
             news_list = [news.get_attribute("href") for news in news_element_list]
             yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
                                  dont_filter=True)
-            scroll(self.browser)
+            scroll(self.browser, sleep_time=0.5)
             next_page = self.browser.find_element_by_xpath('//div[@id="div_currpage"]/a[contains(text(), "下一页")]')
             self.browser.execute_script("arguments[0].click();", next_page)
             time.sleep(1)
