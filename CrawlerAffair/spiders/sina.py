@@ -35,7 +35,7 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 
 
 class SinaNewsSpider(scrapy.Spider):
-    name = ""
+    name = "sina_news_spider"
     urls = []
     allowed_domains = ["sina.com.cn"]
     custom_menu = []
@@ -116,8 +116,8 @@ class SinaNewsSpider(scrapy.Spider):
 
 
 class SinaSifaCommonSpider(scrapy.Spider):
-    name = "sina_sifa_news_spider"
-    urls = ["http://sifa.sina.com.cn/news/"]
+    name = ""
+    urls = []
     allowed_domains = ["sina.com.cn"]
     custom_menu = ["法制热点", "法律法规", "案件聚焦",  "环球法讯"]
     max_page = 200
