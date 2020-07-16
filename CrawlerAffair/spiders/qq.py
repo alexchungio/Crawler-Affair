@@ -27,7 +27,7 @@ from CrawlerAffair.utils import convert_stamp_time
 
 # 无头浏览器设置
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
@@ -62,19 +62,25 @@ class QQNewsSpider(scrapy.Spider):
 
         self.browser.get(response.url)
         time.sleep(2)
+        pre_num_news = 0
         while self.max_page > 0:
             news_element_list = self.browser.find_elements_by_xpath('//ul[@class="list"]/li/div[@class="detail"]/h3/a')
-            for news_element in news_element_list:
-                url = news_element.get_attribute("href")
-                # check is special module
-                if len(news_element.find_elements_by_xpath('./span[@class="zt"]')) > 0:
-                    yield scrapy.Request(url=url, meta=None, callback=self.parse_special_page)
-                else:
-                    yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
-                # tail page
-            scroll(self.browser, sleep_time=0.5)
-            self.max_page -= 1
-            time.sleep(2)
+            cur_num_news = len(news_element_list)
+            if pre_num_news == cur_num_news:
+                break
+            else:
+                 pre_num_news = cur_num_news
+                 for news_element in news_element_list:
+                     url = news_element.get_attribute("href")
+                     # check is special module
+                     if len(news_element.find_elements_by_xpath('./span[@class="zt"]')) > 0:
+                         yield scrapy.Request(url=url, meta=None, callback=self.parse_special_page)
+                     else:
+                         yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
+                     # tail page
+                 scroll(self.browser, sleep_time=0.5)
+                 self.max_page -= 1
+                 time.sleep(1)
 
     def parse_special_page(self, response):
         self.sub_browser.get(response.url)
