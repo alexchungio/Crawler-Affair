@@ -80,13 +80,11 @@ class QQNewsSpider(scrapy.Spider):
                      # tail page
                  scroll(self.browser, sleep_time=0.5)
                  self.max_page -= 1
-                 time.sleep(1)
 
     def parse_special_page(self, response):
         self.sub_browser.get(response.url)
         time.sleep(2)
         sub_news_element_list = self.sub_browser.find_elements_by_xpath('//div[@class="item-box"]/ul/div/li/div[@class="mod-txt"]/h3/a')
-        print(sub_news_element_list)
         for news_element in sub_news_element_list:
             try:
                 url = news_element.get_attribute("href")
