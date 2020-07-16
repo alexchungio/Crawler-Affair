@@ -226,7 +226,7 @@ class GovMultiPageSpider(scrapy.Spider):
         contents.extend(contents_1)
         contents_2= sel.xpath('//div[@class="pages_content"]/p/span/text()').extract()
         contents.extend(contents_2)
-        print(contents)
+        # print(contents)
 
         labels = []
         news_item["spider_time"] = spider_time
