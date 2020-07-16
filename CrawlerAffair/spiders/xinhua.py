@@ -137,7 +137,7 @@ class XinhuaInfoSpider(XinhuaCommonSpider):
         # 'http://www.news.cn/local/wgzg.htm'
         for index in range(1, 5):
             self.index = index
-            # ActionChains(self.browser).move_to_element(menu_switch).perform()
+            # ActionChains(browser).move_to_element(menu_switch).perform()
             yield scrapy.Request(url=self.urls[0], meta=None, callback=self.parse, dont_filter=True)
 
 

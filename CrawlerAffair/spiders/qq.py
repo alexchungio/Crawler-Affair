@@ -27,7 +27,7 @@ from CrawlerAffair.utils import convert_stamp_time
 
 # 无头浏览器设置
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
