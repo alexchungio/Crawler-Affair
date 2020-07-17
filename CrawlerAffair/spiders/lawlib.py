@@ -22,14 +22,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
 from CrawlerAffair.utils import scroll
-from CrawlerAffair.utils import convert_stamp_time
+
+
 
 # 无头浏览器设置
 chrome_options = Options()
 # chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
-
+# 
 driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'libs', 'chromedriver')
 
 
@@ -56,7 +57,16 @@ class LawlibCommonSpider(scrapy.Spider):
     # parse web html
     def parse(self, response):
 
-        self.browser.get(response.url)
+        # fresh page until successful load page
+        while True:
+            try:
+                # self.browser.get(response.url)
+                self.browser.get(response.url)
+            except Exception as e:
+                time.sleep(2)
+                self.browser.refresh()
+                break
+        # self.browser.manage().timeouts().implicitlyWait(20)
         while True:
             scroll(self.browser, height_ratio=0.6)
             news_element_list = self.browser.find_elements_by_xpath('//ul[@class="line2"]/li/span/a')
@@ -71,20 +81,25 @@ class LawlibCommonSpider(scrapy.Spider):
                 self.browser.execute_script("arguments[0].click();", more_button)
                 time.sleep(1)
 
+
+
     def parse_detail(self, response):
 
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
-
         self.sub_browser.get(response.url)
         time.sleep(3)
-        publish_time = self.sub_browser.find_element_by_xpath('//div[@class="tit"]/h2/b').text
-        title_elements = self.sub_browser.find_elements_by_xpath('//div[@class="tit"]/h3')
-        title = [t.text for t in title_elements]
 
-        contents_element = self.sub_browser.find_elements_by_xpath('//div[@class="viewcontent"]')
-        contents = [content.text for content in contents_element]
-        labels = []
+        try:
+            publish_time = self.sub_browser.find_element_by_xpath('//div[@class="tit"]/h2/b').text
+            title_elements = self.sub_browser.find_elements_by_xpath('//div[@class="tit"]/h3')
+            title = [t.text for t in title_elements]
+
+            contents_element = self.sub_browser.find_elements_by_xpath('//div[@class="viewcontent"]')
+            contents = [content.text for content in contents_element]
+            labels = []
+        except Exception as e:
+            raise e
 
         news_item["spider_time"] = spider_time
         news_item["publish_time"] = process_time(publish_time)
