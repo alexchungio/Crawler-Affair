@@ -17,8 +17,11 @@ import scrapy
 from scrapy.selector import Selector
 from selenium import webdriver
 from  selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
@@ -84,13 +87,15 @@ class QQNewsSpider(scrapy.Spider):
     def parse_special_page(self, response):
         self.sub_browser.get(response.url)
         time.sleep(2)
+        wait = WebDriverWait(self.sub_browser, 10)
+        element = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="topArea"]/div[@class="main"]/h1')))
         sub_news_element_list = self.sub_browser.find_elements_by_xpath('//div[@class="item-box"]/ul/div/li/div[@class="mod-txt"]/h3/a')
         for news_element in sub_news_element_list:
             try:
                 url = news_element.get_attribute("href")
                 # check is special module
                 yield scrapy.Request(url=url, meta=None, callback=self.parse_detail)
-            except StaleElementReferenceException:
+            except StaleElementReferenceException as e:
                 continue
 
     def parse_detail(self, response):
