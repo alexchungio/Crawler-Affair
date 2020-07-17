@@ -35,7 +35,7 @@ USER_AGENT = ['Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like G
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
+# CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -43,7 +43,7 @@ CONCURRENT_REQUESTS = 16
 #DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
-#CONCURRENT_REQUESTS_PER_IP = 16
+# CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -57,8 +57,7 @@ CONCURRENT_REQUESTS = 16
 #   'Accept-Language': 'en',
 #}
 
-
-HTTPERROR_ALLOWED_CODES=[400]
+HTTPERROR_ALLOWED_CODES=[400, 111]
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
@@ -94,6 +93,7 @@ ITEM_PIPELINES = {
 AUTOTHROTTLE_START_DELAY = 3
 # The maximum download delay to be set in case of high latencies
 #AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 30
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
 #AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
@@ -107,6 +107,14 @@ AUTOTHROTTLE_START_DELAY = 3
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-PATH = '/home/alex/python_code/CrawlerAffair/data'
+# CRITICAL – 严重错误(critical)
+# ERROR – 一般错误(regular errors)
+# WARNING – 警告信息(warning messages)
+# INFO – 一般信息(informational messages)
+# DEBUG – 调试信息(debugging messages)
+
+LOG_LEVEL='INFO'
+
+PATH = './data'
 DELAY_TIME = 1
 MAX_PAGE = 200
