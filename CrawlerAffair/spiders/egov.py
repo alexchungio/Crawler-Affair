@@ -25,7 +25,7 @@ from CrawlerAffair.utils import scroll
 
 # 无头浏览器设置
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument('--no-sandbox')
 
@@ -38,8 +38,8 @@ class EgovCommonSpider(scrapy.Spider):
     allowed_domains = ["e-gov.org.cn"]
     custom_menu = []
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
+    sub_browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -49,14 +49,14 @@ class EgovCommonSpider(scrapy.Spider):
 
     # 整个爬虫结束后关闭浏览器
     def close(self, spider):
-        self.browser.quit()
-        self.sub_browser.quit()
+        self.browser.close()
+        self.sub_browser.close()
 
     # parse web html
     def parse(self, response):
 
         self.browser.get(response.url)
-        time.sleep(1)
+        self.browser.implicitly_wait(10)
         menu_button_list = self.browser.find_elements_by_xpath(
             '//div[@id="search_list"]/table/tbody/tr/td/div/div/table/tbody/tr/td/div/a[contains(text(), "更多")]')
         # menu_button_list = sel.xpath('//*[@id="search_list"]/table/tbody/tr[1]/td[1]/div/div[2]/table/tbody/tr[11]/td/div/a').extract()
@@ -68,14 +68,20 @@ class EgovCommonSpider(scrapy.Spider):
             pre_all_window = self.browser.window_handles
             self.browser.execute_script("arguments[0].click();", menu_button)
             time.sleep(1)
-            # 针对弹出页面后无法获取当前页面进行处理（非原页面刷新）
+            # 针对新增页面进行处理（非原页面刷新）
             current_all_window = self.browser.window_handles
             for window in current_all_window:
                 if window not in pre_all_window:
                     self.browser.switch_to.window(window)
-            page_label = self.browser.find_element_by_xpath('//*[@id="pageLabel"]/label').text
-
+            page_label_element = self.browser.find_elements_by_xpath('//*[@id="pageLabel"]/label')
+            if len(page_label_element) == 0:
+                self.browser.switch_to_window(main_window)
+                time.sleep(2)
+                continue
+            else:
+                page_label = page_label_element[0].text
             num_page = int(page_label.split(r'/')[-1])
+            num_page =1
             # get page news list
             for index in range(1, num_page + 1):
                 url = self.browser.current_url.replace('.html', f'-{index}.html')
@@ -83,6 +89,7 @@ class EgovCommonSpider(scrapy.Spider):
 
             # back to main window
             self.browser.switch_to_window(main_window)
+            time.sleep(2)
 
     def parse_sub_page(self, response):
 
@@ -140,32 +147,47 @@ class EgovNewsSpider(EgovCommonSpider):
     name = "egov_news_spider"
     urls = ["http://www.e-gov.org.cn/channel-1.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovElectronicSpider(EgovCommonSpider):
     name = "egov_electronic_spider"
     urls = ["http://www.e-gov.org.cn/channel-1001.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovInfoSpider(EgovCommonSpider):
     name = "egov_info_spider"
     urls = ["http://www.e-gov.org.cn/channel-1002.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovComputerSpider(EgovCommonSpider):
     name = "egov_computer_spider"
     urls = ["http://www.e-gov.org.cn/channel-1004.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovExhibitionSpider(EgovCommonSpider):
     name = "egov_exhibition_spider"
     urls = ["http://www.e-gov.org.cn/channel-1012.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovPurchaseSpider(EgovCommonSpider):
     name = "egov_purchase_spider"
     urls = ["http://www.e-gov.org.cn/channel-1005.html"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class EgovCompanySpider(EgovCommonSpider):
     name = "egov_company_spider"
     urls = ["http://www.e-gov.org.cn/channel-1014.html"]
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
