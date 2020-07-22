@@ -81,7 +81,6 @@ class EgovCommonSpider(scrapy.Spider):
             else:
                 page_label = page_label_element[0].text
             num_page = int(page_label.split(r'/')[-1])
-            num_page =1
             # get page news list
             for index in range(1, num_page + 1):
                 url = self.browser.current_url.replace('.html', f'-{index}.html')
