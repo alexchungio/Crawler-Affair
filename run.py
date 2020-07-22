@@ -22,6 +22,8 @@ from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
 from scrapy.utils.project import get_project_settings
+# from scrapy.settings import Settings
+
 from CrawlerAffair.spiders import china
 from CrawlerAffair.spiders import  cctv
 from CrawlerAffair.spiders import chinadaily
@@ -109,7 +111,8 @@ if __name__ == "__main__":
 
     # running the spiders sequentially by chaining the deferreds:
     configure_logging()
-    runner = CrawlerRunner()
+    settings = get_project_settings()
+    runner = CrawlerRunner(settings=settings)
 
     @defer.inlineCallbacks
     def crawl():
@@ -148,8 +151,6 @@ if __name__ == "__main__":
 
         # renmin
         yield runner.crawl(renmin.RenminPoliticsSpider)
-
-
 
         # thepapaer
         yield runner.crawl(thepaper.ThepaperSelectSpider)
