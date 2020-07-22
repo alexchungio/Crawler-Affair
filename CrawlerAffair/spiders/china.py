@@ -70,7 +70,11 @@ class ChinaNewsSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//*[@id="pubtime_baidu"]/text()').extract()[0]
+        publish_time = sel.xpath('//*[@id="pubtime_baidu"]/text()').extract()
+        if len(publish_time) > 0:
+            publish_time = publish_time[0]
+        else:
+            publish_time = None
 
         title = sel.xpath('//h1[@class="articleTitle"]/text()').extract()
         contents = sel.xpath('//*[@id="articleBody"]/p/text()').extract()
@@ -143,7 +147,11 @@ class ChinaAffairSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="big_img"]/div[@class="more"]/text()').extract_first()
+        publish_time = sel.xpath('//div[@class="big_img"]/div[@class="more"]/text()')
+        if len(publish_time) > 0:
+            publish_time = publish_time[0]
+        else:
+            publish_time = None
 
         title = sel.xpath('//div[@class="big_img"]/h1/text()').extract()
         contents = sel.xpath('//*[@id="content"]/p/text()').extract()
@@ -211,7 +219,11 @@ class ChinaOpinionSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="article-info"]/p/span[@class="article-timestamp ml10"]/text()').extract_first()
+        publish_time = sel.xpath('//div[@class="article-info"]/p/span[@class="article-timestamp ml10"]/text()')
+        if len(publish_time) > 0:
+            publish_time = publish_time[0]
+        else:
+            publish_time = None
 
         title = sel.xpath('//div[@class="article-title"]/h1/text()').extract()
         contents = sel.xpath('//div[@class="article-content"]/p/text()').extract()
@@ -285,7 +297,11 @@ class ChinaTheorySpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="info"]/div[@class="pub_date"]/*[@id="pubtime_baidu"]/text()').extract_first()
+        publish_time = sel.xpath('//div[@class="info"]/div[@class="pub_date"]/*[@id="pubtime_baidu"]/text()')
+        if len(publish_time) > 0:
+            publish_time = publish_time[0]
+        else:
+            publish_time = None
 
         title = sel.xpath('//div[@class="leftbox"]/h1[@class="artTitle"]/text()').extract()
         contents = sel.xpath('//div[@class="info"]/div[@id="artbody"]/p/text()').extract()
