@@ -17,15 +17,15 @@ from  selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 
 # no-head browser
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-chrome_options.add_argument("--disable-gpu")
-chrome_options.add_argument('--no-sandbox')
-
-driver_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'libs', 'chromedriver')
-browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+# chrome_options = Options()
+# chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--disable-gpu")
+# chrome_options.add_argument('--no-sandbox')
+#
+# driver_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'libs', 'chromedriver')
+# browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+# sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+# detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 def process_title(title):
     """
@@ -43,7 +43,7 @@ def process_title(title):
 
     else:
         title = ''
-    title.replace('/', '每')
+    title = title.replace('/', '每')
     return title
 
 def process_label(labels):
