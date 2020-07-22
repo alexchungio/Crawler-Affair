@@ -38,8 +38,8 @@ class ChinadailyCommonSpider(scrapy.Spider):
     urls = []
     allowed_domains = ["chinadaily.com.cn"]
     custom_menu = []
-
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    # browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -116,8 +116,12 @@ class ChinadailyWorldSpider(ChinadailyCommonSpider):
     urls = ["https://world.chinadaily.com.cn"]
     custom_menu = ["独家", "要闻", "滚动"]
 
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+
 
 class ChinadailyChinaSpider(ChinadailyCommonSpider):
     name = "chinadaily_china_spider"
     urls = ["https://china.chinadaily.com.cn"]
     custom_menu = ["要闻", "独家"]
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
