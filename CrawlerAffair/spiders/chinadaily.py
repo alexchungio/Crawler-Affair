@@ -113,7 +113,7 @@ class ChinadailyCommonSpider(scrapy.Spider):
 
 class ChinadailyWorldSpider(ChinadailyCommonSpider):
     name = "chinadaily_world_spider"
-    urls = ["https://china.chinadaily.com.cn"]
+    urls = ["https://world.chinadaily.com.cn"]
     custom_menu = ["独家", "要闻", "滚动"]
 
 
