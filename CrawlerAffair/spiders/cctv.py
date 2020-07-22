@@ -42,7 +42,7 @@ class CCTVNewsSpider(scrapy.Spider):
     urls = []
     allowed_domains = ["cctv.com"]
 
-    # browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -166,9 +166,6 @@ class CCTVShipingSpider(scrapy.Spider):
 
         return news_item
 
-# class XinhuaPoliticsSpider(XinhuaCommonSpider):
-#     name = "xinhua_politics_spider"
-#     urls = ['http://www.news.cn/politics/index.htm', 'http://www.news.cn/politics/xgc.htm']
 
 class CCTVCaijingSpider(scrapy.Spider):
     "央视网观点"
@@ -176,7 +173,7 @@ class CCTVCaijingSpider(scrapy.Spider):
     urls = ["https://jingji.cctv.com/caijing/index.shtml"]
     allowed_domains = ["cctv.com"]
 
-    # browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         for url in self.urls:
@@ -190,7 +187,7 @@ class CCTVCaijingSpider(scrapy.Spider):
     def parse(self, response):
         # '[contains(text(), ">")]'
         sel = Selector(response)
-        news_list = sel.xpath('//*[@id="leftContent"]/div/h3/span/a/@href').extract()
+        news_list = sel.xpath('//*[@id="newslist"]/li/div[@class="text_con"]/h3/a/@href').extract()
         for news_url in news_list:
             # label = sel.xpath('//div[@class="v1000 clearfix bc"]/div[@class="fl w650"]/h1[@class="title]/span/text()')
 

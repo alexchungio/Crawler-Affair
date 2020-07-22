@@ -11,7 +11,7 @@ import scrapy
 from scrapy import signals
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException
 from CrawlerAffair.spiders.xinhua import XinhuaPoliticsSpider, XinhuaLocalSpider, XinhualegalSpider, XinhuaRenshiSpider, XinhuaInfoSpider,XinhuaSilkRoad
 from CrawlerAffair.spiders.cctv import CCTVNewsSpider, CCTVCaijingSpider
 from CrawlerAffair.utils import scroll
@@ -184,6 +184,9 @@ class XinhuaMiddleware(object):
                             break
                         except StaleElementReferenceException:
                             break
+                        except NoSuchElementException:
+                            break
+
                 # return selenium response
                 html = spider.browser.page_source
                 return scrapy.http.HtmlResponse(url=spider.browser.current_url, body=html.encode(), encoding="utf-8",
@@ -273,10 +276,11 @@ class CCTVMiddleware(object):
                 # switch menu
                 more_btn = None
                 click_element = None
+                scroll(spider.browser)
                 if spider.name == CCTVNewsSpider.name:
                     more_btn = spider.browser.find_elements_by_xpath('//div[@class="more"]')
                 elif spider.name == CCTVCaijingSpider.name:
-                    more_btn = spider.browser.find_elements_by_xpath('//div[@id="open_box"]')
+                    more_btn = spider.browser.find_elements_by_xpath('//div[@class="more"]')
                     # click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
                 if len(more_btn)!= 0:
                     while self.max_page > 0:
@@ -294,7 +298,7 @@ class CCTVMiddleware(object):
                                 else:
                                     break
                             if spider.name == CCTVCaijingSpider.name:
-                                click_element = spider.browser.find_element_by_xpath('//div[@id="open_box"]')
+                                click_element = spider.browser.find_element_by_xpath('//div[@class="more"]')
                                 if click_element.text == "没有更多数据":
                                     break
                             ActionChains(spider.browser).click(click_element).perform()
@@ -303,6 +307,8 @@ class CCTVMiddleware(object):
                         except ElementNotInteractableException:
                             break
                         except StaleElementReferenceException:
+                            break
+                        except NoSuchElementException:
                             break
 
                 # return selenium response
