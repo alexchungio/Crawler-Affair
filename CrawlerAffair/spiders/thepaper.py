@@ -42,7 +42,7 @@ class ThepapaperCommonSpider(scrapy.Spider):
     max_page = 200
     custom_menu = []
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -122,10 +122,12 @@ class ThepaperSelectSpider(ThepapaperCommonSpider):
     name = "thepaper_select_spider"
     urls = ["https://www.thepaper.cn/"]
     allowed_domains = ["thepaper.cn"]
-
+    max_page = 100
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class ThepaperShishiSpider(ThepapaperCommonSpider):
     name = "thepaper_shishi_spider"
     urls = ["https://www.thepaper.cn/channel_25950"]
     allowed_domains = ["thepaper.cn"]
     max_page = 100
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
