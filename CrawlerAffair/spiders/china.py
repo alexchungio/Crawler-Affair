@@ -81,7 +81,7 @@ class ChinaNewsSpider(scrapy.Spider):
         labels = sel.xpath('//*[@id="articleKeywords"]/a/text()').extract()
 
         news_item["spider_time"] = spider_time
-        news_item["publish_time"] = process_time(publish_time.strip())
+        news_item["publish_time"] = process_time(publish_time)
         news_item["title"] = process_title(title)
         news_item['label'] = process_label(labels)
         news_item["content"] = process_content(contents)
@@ -147,7 +147,7 @@ class ChinaAffairSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="big_img"]/div[@class="more"]/text()')
+        publish_time = sel.xpath('//div[@class="big_img"]/div[@class="more"]/text()').extract()
         if len(publish_time) > 0:
             publish_time = publish_time[0]
         else:
@@ -219,7 +219,7 @@ class ChinaOpinionSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="article-info"]/p/span[@class="article-timestamp ml10"]/text()')
+        publish_time = sel.xpath('//div[@class="article-info"]/p/span[@class="article-timestamp ml10"]/text()').extract()
         if len(publish_time) > 0:
             publish_time = publish_time[0]
         else:
@@ -297,7 +297,7 @@ class ChinaTheorySpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
 
-        publish_time = sel.xpath('//div[@class="info"]/div[@class="pub_date"]/*[@id="pubtime_baidu"]/text()')
+        publish_time = sel.xpath('//div[@class="info"]/div[@class="pub_date"]/*[@id="pubtime_baidu"]/text()').extract()
         if len(publish_time) > 0:
             publish_time = publish_time[0]
         else:
