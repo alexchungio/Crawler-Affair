@@ -40,7 +40,7 @@ class XinhuaCommonSpider(scrapy.Spider):
     urls = []
     allowed_domains = ["news.cn", "xinhuanet.com"]
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -115,15 +115,17 @@ class XinhuaLocalSpider(XinhuaCommonSpider):
     name = "xinhua_local_spider"
     urls = ['http://www.news.cn/local/index.htm', 'http://www.news.cn/local/wgzg.htm']
 
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class XinhualegalSpider(XinhuaCommonSpider):
     name = "xinhua_legal_spider"
     urls = ["http://www.news.cn/legal/index.htm", "http://www.news.cn/legal/fy.htm", "http://www.news.cn/legal/ffu.htm"]
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class XinhuaRenshiSpider(XinhuaCommonSpider):
     name= "xinhua_renshi_spider"
     urls = ["http://www.xinhuanet.com/politics/rs.htm"]
-
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class XinhuaInfoSpider(XinhuaCommonSpider):
     name = "xinhua_info_spider"
@@ -145,7 +147,7 @@ class XinhuaSilkRoad(XinhuaCommonSpider):
     name = "xinhua_siklroad_spider"
     # urls = ["http://www.news.cn/info/index.htm", "http://www.news.cn/info/tx.htm", "http://www.news.cn/info/ydhlw.htm"]
     urls = []
-
+    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
     def start_requests(self):
         urls = ["http://www.news.cn/silkroad/index.htm"]

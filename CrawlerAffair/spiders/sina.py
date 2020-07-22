@@ -122,8 +122,8 @@ class SinaSifaCommonSpider(scrapy.Spider):
     custom_menu = ["法制热点", "法律法规", "案件聚焦",  "环球法讯"]
     max_page = 200
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-    detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
+    detail_browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -214,10 +214,16 @@ class SinaSifaNewsSpider(SinaSifaCommonSpider):
     name = "sina_sifa_news_spider"
     urls = ["http://sifa.sina.com.cn/news/"]
     custom_menu = ["法制热点", "法律法规", "案件聚焦",  "环球法讯"]
-    max_page = 200
+    max_page = 500
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class SinaSifaPublicitySpider(SinaSifaCommonSpider):
     name = "sina_sifa_publicity_spider"
     urls = ["http://sifa.sina.com.cn/publicity/"]
     custom_menu = ["法院", "司法行政", "检察院"]
-    max_page = 200
+    max_page = 500
+
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
