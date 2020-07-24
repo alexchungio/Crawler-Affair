@@ -24,6 +24,9 @@ from CrawlerAffair.utils import process_title, process_time, process_content, pr
 from CrawlerAffair.items import CrawlerAffairItem
 from CrawlerAffair.utils import scroll
 from CrawlerAffair.utils import convert_stamp_time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # 无头浏览器设置
 chrome_options = Options()
@@ -59,6 +62,8 @@ class SinaNewsSpider(scrapy.Spider):
     def parse(self, response):
 
         self.browser.get(response.url)
+        wait = WebDriverWait(self.browser, 2)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="d_list_txt"]/ul/li/span[@class="c_tit"]/a')))
         while self.max_page > 0:
             news_element_list = self.browser.find_elements_by_xpath('//div[@class="d_list_txt"]/ul/li/span[@class="c_tit"]/a')
             for news_element in news_element_list:
@@ -77,7 +82,8 @@ class SinaNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(1)
+        wait = WebDriverWait(self.detail_browser, 1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')))
 
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
             '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
@@ -140,7 +146,8 @@ class SinaSifaCommonSpider(scrapy.Spider):
     def parse(self, response):
 
         self.browser.get(response.url)
-        time.sleep(2)
+        wait = WebDriverWait(self.browser, 2)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="feedCardConfigurableTabs"]/span')))
         while self.max_page > 0:
             menu_button_list = self.browser.find_elements_by_xpath('//div[@id="feedCardConfigurableTabs"]/span')
             for menu_button in menu_button_list:
@@ -173,7 +180,8 @@ class SinaSifaCommonSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(1)
+        wait = WebDriverWait(self.detail_browser, 1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')))
 
         publish_time_element_0 = self.detail_browser.find_elements_by_xpath(
             '//div[@id="top_bar"]/div/div[@class="date-source"]/span[@class="date"]')
