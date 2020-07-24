@@ -86,9 +86,8 @@ class QQNewsSpider(scrapy.Spider):
 
     def parse_special_page(self, response):
         self.sub_browser.get(response.url)
-        time.sleep(2)
-        wait = WebDriverWait(self.sub_browser, 10)
-        element = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="topArea"]/div[@class="main"]/h1')))
+        wait = WebDriverWait(self.sub_browser, 2)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="topArea"]/div[@class="main"]/h1')))
         sub_news_element_list = self.sub_browser.find_elements_by_xpath('//div[@class="item-box"]/ul/div/li/div[@class="mod-txt"]/h3/a')
         for news_element in sub_news_element_list:
             try:
@@ -104,7 +103,8 @@ class QQNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        time.sleep(1)
+        wait = WebDriverWait(self.detail_browser, 0.5)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '/html/head/meta[contains(@name, "apub:time")]')))
 
         publish_time_element = self.detail_browser.find_element_by_xpath('/html/head/meta[contains(@name, "apub:time")]')
         publish_time = publish_time_element.get_attribute("content")
