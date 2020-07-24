@@ -21,7 +21,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
 from CrawlerAffair.utils import scroll
-
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # 无头浏览器设置
 chrome_options = Options()
@@ -56,7 +58,9 @@ class EgovCommonSpider(scrapy.Spider):
     def parse(self, response):
 
         self.browser.get(response.url)
-        self.browser.implicitly_wait(10)
+        # self.browser.implicitly_wait(5)
+        # time.sleep(1)
+
         menu_button_list = self.browser.find_elements_by_xpath(
             '//div[@id="search_list"]/table/tbody/tr/td/div/div/table/tbody/tr/td/div/a[contains(text(), "更多")]')
         # menu_button_list = sel.xpath('//*[@id="search_list"]/table/tbody/tr[1]/td[1]/div/div[2]/table/tbody/tr[11]/td/div/a').extract()
@@ -67,16 +71,17 @@ class EgovCommonSpider(scrapy.Spider):
 
             pre_all_window = self.browser.window_handles
             self.browser.execute_script("arguments[0].click();", menu_button)
-            time.sleep(1)
+            # time.sleep(1)
             # 针对新增页面进行处理（非原页面刷新）
             current_all_window = self.browser.window_handles
             for window in current_all_window:
                 if window not in pre_all_window:
                     self.browser.switch_to.window(window)
+                    time.sleep(0.5)
             page_label_element = self.browser.find_elements_by_xpath('//*[@id="pageLabel"]/label')
             if len(page_label_element) == 0:
                 self.browser.switch_to_window(main_window)
-                time.sleep(2)
+                time.sleep(0.5)
                 continue
             else:
                 page_label = page_label_element[0].text
@@ -88,12 +93,14 @@ class EgovCommonSpider(scrapy.Spider):
 
             # back to main window
             self.browser.switch_to_window(main_window)
-            time.sleep(2)
+            time.sleep(0.5)
 
     def parse_sub_page(self, response):
 
         self.sub_browser.get(response.url)
-        time.sleep(1)
+        # time.sleep(0.5)
+        wait = WebDriverWait(self.sub_browser, 2)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="search_list"]/table/tbody/tr/td/a')))
         news_element_list = self.sub_browser.find_elements_by_xpath('//*[@id="search_list"]/table/tbody/tr/td/a')
         news_list = [news.get_attribute("href") for news in news_element_list]
         for news_url in news_list:
@@ -106,7 +113,10 @@ class EgovCommonSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.sub_browser.get(response.url)
-        time.sleep(1)
+        # time.sleep(0.5)
+        # time.sleep(1)
+        wait = WebDriverWait(self.sub_browser, 1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="text_block"]/div[@id="content_detail"]')))
 
         publish_time = self.sub_browser.find_element_by_xpath('//div[@id="text_block"]/div[@id="content_detail"]').text
         title_elements = self.sub_browser.find_elements_by_xpath('//div[@id="text_block"]/div[@class="title_bar"]')
