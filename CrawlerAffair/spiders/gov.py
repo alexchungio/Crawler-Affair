@@ -39,8 +39,8 @@ class GovOnePageSpider(scrapy.Spider):
     allowed_domains = ["gov.cn"]
     custom_menu = []
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
+    sub_browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -130,8 +130,8 @@ class GovMultiPageSpider(scrapy.Spider):
     allowed_domains = ["gov.cn"]
     custom_menu = []
 
-    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
-    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    browser = None
+    sub_browser = None
 
     def start_requests(self):
         # 'http://www.news.cn/local/wgzg.htm'
@@ -242,11 +242,15 @@ class GovMultiPageSpider(scrapy.Spider):
 class GovYaowenSpider(GovOnePageSpider):
     name = "gov_yaowen_spider"
     urls = ["http://www.gov.cn/xinwen/yaowen.htm"]
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 
 class GovPolicySpider(GovOnePageSpider):
     name = "gov_policy_spider"
     urls = ["http://www.gov.cn/zhengce/zuixin.htm"]
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 
 class GovLianboSpider(GovMultiPageSpider):
@@ -254,15 +258,21 @@ class GovLianboSpider(GovMultiPageSpider):
     urls = ["http://www.gov.cn/xinwen/lianbo/index.htm"]
     allowed_domains = ["gov.cn"]
     custom_menu = ["部门","地方"]
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class GovFabuSpider(GovMultiPageSpider):
     name = "gov_fabu_spider"
     urls = ["http://www.gov.cn/xinwen/fabu/index.htm"]
     allowed_domains = ["gov.cn"]
     custom_menu = ["部门","其他"]
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
-class GovRenmianSpider(scrapy.Spider):
-    name = "gov_renmian_spider"
-    urls = ["http://www.gov.cn/xinwen/renmian/index.htm"]
-    allowed_domains = ["gov.cn"]
-    custom_menu= ["中央", "地方", "驻外", "其他"]
+# class GovRenmianSpider(scrapy.Spider):
+#     name = "gov_renmian_spider"
+#     urls = ["http://www.gov.cn/xinwen/renmian/index.htm"]
+#     allowed_domains = ["gov.cn"]
+#     custom_menu= ["中央", "地方", "驻外", "其他"]
+#     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+#     sub_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
