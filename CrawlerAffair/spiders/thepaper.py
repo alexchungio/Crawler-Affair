@@ -56,7 +56,6 @@ class ThepapaperCommonSpider(scrapy.Spider):
 
     # parse web html
     def parse(self, response):
-        sel = Selector(response)
 
         self.browser.get(response.url)
         time.sleep(2)
@@ -100,7 +99,6 @@ class ThepapaperCommonSpider(scrapy.Spider):
         news_item = CrawlerAffairItem()
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
-        '/html/body/div[3]/div[1]/div[1]/h1'
         publish_time = sel.xpath('//div[@class="newscontent"]/div[@class="news_about"]/p/text()').extract()
         title = sel.xpath('//div[@class="newscontent"]/h1/text()').extract()
         contents = sel.xpath('//div[@class="news_txt"]/text()').extract()
