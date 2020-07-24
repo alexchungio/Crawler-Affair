@@ -30,6 +30,9 @@ from selenium import webdriver
 from  selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from CrawlerAffair.utils import process_title, process_time, process_content, process_label
 from CrawlerAffair.items import CrawlerAffairItem
@@ -72,10 +75,12 @@ class FujianInfoSpider(scrapy.Spider):
 
         self.browser.get(response.url)
         # show as list
-        time.sleep(1)
+        wait = WebDriverWait(self.browser, 1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="last-notice-top"]/a')))
+
         info_page = self.browser.find_element_by_xpath('//div[@class="last-notice-top"]/a')
         self.browser.execute_script("arguments[0].click();", info_page)
-        time.sleep(1)
+        time.sleep(0.5)
         page_list = self.browser.find_elements_by_xpath('//ul[@class="el-pager"]/li')
         #
         for i in range(int(page_list[-1].text)):
@@ -83,10 +88,10 @@ class FujianInfoSpider(scrapy.Spider):
             news_list = [news.get_attribute("href") for news in news_element_list]
             yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
                                  dont_filter=True)
-            time.sleep(1)
+            time.sleep(0.5)
             next_page = self.browser.find_element_by_xpath('//*[@class="btn-next"]/i')
             self.browser.execute_script("arguments[0].click();", next_page)
-            time.sleep(2)
+            time.sleep(1)
 
     def parse_sub_page(self, response):
 
@@ -99,10 +104,13 @@ class FujianInfoSpider(scrapy.Spider):
         sel = Selector(response)
 
         news_item = CrawlerAffairItem()
+
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
         self.sub_browser.get(response.url)
-        time.sleep(1)
+        wait = WebDriverWait(self.browser, 1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')))
+
         publish_time_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
         publish_time = [time.text for time in publish_time_element]
         title_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')
