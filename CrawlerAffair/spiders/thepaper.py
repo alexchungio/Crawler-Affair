@@ -68,8 +68,8 @@ class ThepapaperCommonSpider(scrapy.Spider):
 
         while self.max_page > 0:
             try:
-                last_height = scroll(self.browser, sleep_time=0.5)
-                print(last_height)
+                # last_height = scroll(self.browser, sleep_time=0.5)
+                # print(last_height)
                 add_buttons = self.browser.find_elements_by_xpath(
                     '//div[@id="addButton"]/a[contains(text(), "点击加载更多")]')
                 end_flag = self.browser.find_elements_by_xpath(
@@ -120,12 +120,12 @@ class ThepaperSelectSpider(ThepapaperCommonSpider):
     name = "thepaper_select_spider"
     urls = ["https://www.thepaper.cn/"]
     allowed_domains = ["thepaper.cn"]
-    max_page = 100
-    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    max_page = 200
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
 
 class ThepaperShishiSpider(ThepapaperCommonSpider):
     name = "thepaper_shishi_spider"
     urls = ["https://www.thepaper.cn/channel_25950"]
     allowed_domains = ["thepaper.cn"]
-    max_page = 100
-    webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+    max_page = 200
+    browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
