@@ -9,17 +9,6 @@
 # @ Time       : 2020/7/8 下午4:51
 # @ Software   : PyCharm
 #-------------------------------------------------------
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#------------------------------------------------------
-# @ File       : thepaper.py
-# @ Description:
-# @ Author     : Alex Chung
-# @ Contact    : yonganzhong@outlook.com
-# @ License    : Copyright (c) 2017-2018
-# @ Time       : 2020/7/8 上午11:58
-# @ Software   : PyCharm
-#-------------------------------------------------------
 
 import os
 import re
@@ -75,9 +64,9 @@ class FujianInfoSpider(scrapy.Spider):
 
         self.browser.get(response.url)
         # show as list
-        wait = WebDriverWait(self.browser, 1)
-        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="last-notice-top"]/a')))
-
+        # wait = WebDriverWait(self.browser, 1)
+        # wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="last-notice-top"]/a')))
+        time.sleep(1)
         info_page = self.browser.find_element_by_xpath('//div[@class="last-notice-top"]/a')
         self.browser.execute_script("arguments[0].click();", info_page)
         time.sleep(0.5)
@@ -86,18 +75,18 @@ class FujianInfoSpider(scrapy.Spider):
         for i in range(int(page_list[-1].text)):
             news_element_list = self.browser.find_elements_by_xpath('//table/tbody/tr/td/a')
             news_list = [news.get_attribute("href") for news in news_element_list]
-            yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
-                                 dont_filter=True)
-            time.sleep(0.5)
+            # yield scrapy.Request(url=sel.response.url, meta={"news_list": news_list}, callback=self.parse_sub_page,
+            #                      dont_filter=True)
+            for news_url in news_list:
+                yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
             next_page = self.browser.find_element_by_xpath('//*[@class="btn-next"]/i')
             self.browser.execute_script("arguments[0].click();", next_page)
-            time.sleep(1)
+            time.sleep(0.5)
 
-    def parse_sub_page(self, response):
-
-        news_list = response.meta["news_list"]
-        for news_url in news_list:
-            yield scrapy.Request(url=news_url, meta=None, callback=self.parse_detail)
+    # def parse_sub_page(self, response):
+    #
+    #     news_list = response.meta["news_list"]
+    #
 
     def parse_detail(self, response):
 
@@ -108,9 +97,9 @@ class FujianInfoSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
         # '/html/body/div[2]/div[3]/div/div[1]'
         self.sub_browser.get(response.url)
-        wait = WebDriverWait(self.browser, 1)
-        wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')))
-
+        # wait = WebDriverWait(self.browser, 1)
+        # wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="inner-content"]/div[@class="show_title"]')))
+        time.sleep(0.5)
         publish_time_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_time"]/div/div[2]')
         publish_time = [time.text for time in publish_time_element]
         title_element = self.sub_browser.find_elements_by_xpath('//div[@class="inner-content"]/div[@class="show_title"]')
