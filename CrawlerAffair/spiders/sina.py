@@ -39,10 +39,10 @@ driver_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__fi
 
 class SinaNewsSpider(scrapy.Spider):
     name = "sina_news_spider"
-    urls = []
+    urls = ["https://news.sina.com.cn/roll"]
     allowed_domains = ["sina.com.cn"]
     custom_menu = []
-    max_page = 2000
+    max_page = 500
 
     browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
     detail_browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
@@ -73,7 +73,7 @@ class SinaNewsSpider(scrapy.Spider):
             scroll(self.detail_browser, sleep_time=0.5)
             next_button = self.browser.find_element_by_xpath('//div[@class="pagebox"]/span/a[contains(text(), "下一页")]')
             self.browser.execute_script("arguments[0].click();", next_button)
-            time.sleep(2)
+            time.sleep(1)
             self.max_page -= 1
 
     def parse_detail(self, response):

@@ -103,9 +103,9 @@ class QQNewsSpider(scrapy.Spider):
         spider_time = str(int(time.time()))
 
         self.detail_browser.get(response.url)
-        wait = WebDriverWait(self.detail_browser, 0.5)
-        wait.until(EC.element_to_be_clickable((By.XPATH, '/html/head/meta[contains(@name, "apub:time")]')))
-
+        # wait = WebDriverWait(self.detail_browser, 1)
+        # wait.until(EC.element_to_be_clickable((By.XPATH, '/html/head/meta[contains(@name, "apub:time")]')))
+        time.sleep(0.5)
         publish_time_element = self.detail_browser.find_element_by_xpath('/html/head/meta[contains(@name, "apub:time")]')
         publish_time = publish_time_element.get_attribute("content")
         title_elements = self.detail_browser.find_elements_by_xpath('//div[@class="qq_conent clearfix"]/div[@class="LEFT"]/h1')
